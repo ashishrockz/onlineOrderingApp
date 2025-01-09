@@ -2,12 +2,14 @@ import { StyleSheet, Text, View } from 'react-native';
 import React from 'react';
 import FooterIndex from '../components/FooterIndex';
 import Orders from '../components/Order';
+import Header from '../components/Header';
 
 
 const Index = () => {
   return (
     <View style={styles.container}>  
-      <Orders />
+        <Header />
+        <Orders />
     </View>
   );
 };

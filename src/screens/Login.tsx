@@ -11,9 +11,11 @@ import {
   ScrollView,
   Dimensions,
   Button,
+  Alert,
 } from 'react-native';
 import React, {useContext, useEffect, useState} from 'react';
 import { loginToken } from '../hooks/AuthuContext';
+import ForgotPassword from '../components/ForgotPassword';
 const {width, height} = Dimensions.get('window');
  
 const Login = () => {
@@ -37,14 +39,12 @@ const Login = () => {
         const data = await response.json();
         setToken(true);
         console.log(data);
-      } else {
-        setToken(false);
-        setError('Something went wrong... Please try again');
-      }
+      } 
     } catch (error) {
       setToken(false);
       console.error(error);
       setError('An error occurred. Please try again.');
+      Alert.alert("Invalid Credentials please try again")
     }
   };  
  
@@ -156,9 +156,7 @@ const Login = () => {
               </View>
               {errors.password && <Text style={{color:"red",fontSize:18}}>{errMsg.password}</Text>}
             </View>
-            <TouchableOpacity style={styles.forgotPassword}>
-              <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
-            </TouchableOpacity>
+            <ForgotPassword />
             <TouchableOpacity
               style={[
                 styles.loginButton,

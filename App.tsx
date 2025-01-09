@@ -4,7 +4,8 @@ import React from "react";
 import Index from "./src/screens/Index";
 import Header from "./src/components/Header";
 import Login from "./src/screens/Login";
-import RecentOrdersOfUsers from "./src/components/recentOrdersOfUsers";
+import RecentOrdersOfUsers from "./src/components/RecentOrdersOfUsers";
+import ComponentNavigations from "./src/navigations/ComponentNavigations";
  
  
 function App(): React.JSX.Element {
@@ -14,14 +15,18 @@ function App(): React.JSX.Element {
     <loginToken.Provider value={{ token, setToken }}>
       {token ? (
         <>
-          <Header />
+          {/* <Header />
           <Index />
-          {/* <RecentOrdersOfUsers/> */}
+          <RecentOrdersOfUsers/> */}
+          <ComponentNavigations />
         </>
       ) : (
         <Login />
       )}
     </loginToken.Provider>
+    // <>
+    // {/* <RecentOrdersOfUsers /> */}
+    // </>
   );
 }
  

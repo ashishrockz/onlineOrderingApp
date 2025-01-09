@@ -1,0 +1,113 @@
+{"dummyData" : {
+    "user_id": 98765,
+    "name": "Emily Johnson",
+    "orders": [
+      {
+        "order_id": 2001,
+        "dishes": [
+          {
+            "dish_name": "Margherita Pizza",
+            "quantity": 1,
+            "itemType": "Vegetarian"
+          },
+          {
+            "dish_name": "Garlic Bread",
+            "quantity": 2,
+            "itemType": "Vegetarian"
+          }
+        ],
+        "delivery_mode": "Dine-In",
+        "amount_paid": 18.50,
+        "order_date_time": "06-01-2025  12:45 PM",
+        "status":"Completed"
+      },
+      {
+        "order_id": 2002,
+        "dishes": [
+          {
+            "dish_name": "Grilled Chicken Salad",
+            "quantity": 1,
+            "itemType": "Non-Vegetarian"
+          },
+          {
+            "dish_name": "Lemonade",
+            "quantity": 1,
+            "itemType": "Vegetarian"
+          }
+        ],
+        "delivery_mode": "Takeaway",
+        "amount_paid": 12.30,
+        "order_date_time": "05-01-2025  7:30 PM",
+        "status":"Completed"
+      },
+      {
+        "order_id": 2003,
+        "dishes": [
+          {
+            "dish_name": "Spaghetti Bolognese",
+            "quantity": 1,
+            "itemType": "Non-Vegetarian"
+          },
+          {
+            "dish_name": "Tiramisu",
+            "quantity": 1,
+            "itemType": "Vegetarian"
+          }
+        ],
+        "delivery_mode": "Delivery",
+        "amount_paid": 22.75,
+        "order_date_time": "01-01-2025  1:15 PM",
+        "status":"Cancelled"
+      },
+      {
+        "order_id": 2004,
+        "dishes": [
+          {
+            "dish_name": "BBQ Chicken Wings",
+            "quantity": 2,
+            "itemType": "Non-Vegetarian"
+          },
+          {
+            "dish_name": "French Fries",
+            "quantity": 1,
+            "itemType": "Vegetarian"
+          },
+          {
+            "dish_name": "Coca-Cola",
+            "quantity": 1,
+            "itemType": "Vegetarian"
+          }
+        ],
+        "delivery_mode": "Dine-In",
+        "amount_paid": 16.40,
+        "order_date_time": "02-01-2025  6:50 PM",
+        "status":"Refunded"
+      },
+      {
+        "order_id": 2005,
+        "dishes": [
+          {
+            "dish_name": "Vegetable Curry",
+            "quantity": 1,
+            "itemType": "Vegetarian"
+          },
+          {
+            "dish_name": "Steamed Rice",
+            "quantity": 1,
+            "itemType": "Vegetarian"
+          },
+          {
+            "dish_name": "Mango Lassi",
+            "quantity": 1,
+            "itemType": "Vegetarian"
+          }
+        ],
+        "delivery_mode": "Delivery",
+        "amount_paid": 14.20,
+        "order_date_time": "04-01-2025  8:40 PM",
+         "status":"Cancelled"
+      }
+    ]
+  }
+}
+ 

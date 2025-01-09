@@ -9,8 +9,8 @@ const ComponentNavigations = () => {
   return (
     <NavigationContainer>
       <Stack.Navigator initialRouteName='Home'>
-        <Stack.Screen name="Home" component={Index}/>
-        <Stack.Screen name="RecentOrders" component={RecentOrdersOfUsers} />
+        <Stack.Screen name="Home" component={Index} options={{headerShown:false}}/>
+        <Stack.Screen name="RecentOrdersOfUsers" component={RecentOrdersOfUsers} />
       </Stack.Navigator>
     </NavigationContainer>
   )

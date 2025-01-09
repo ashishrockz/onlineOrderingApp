@@ -1,142 +1,295 @@
-import { Dimensions, Image, SafeAreaView, ScrollView, StyleSheet, Text, View } from "react-native"
-const dummyData = {
-    "user_id": 98765,
-    "name": "Emily Johnson",
-    "orders": [
-      {
-        "order_id": 2001,
-        "dishes": [
-          {
-            "dish_name": "Margherita Pizza",
-            "quantity": 1,
-            "vegOrNonVeg": "Vegetarian"
-          },
-          {
-            "dish_name": "Garlic Bread",
-            "quantity": 2,
-            "vegOrNonVeg": "Vegetarian"
-          }
-        ],
-        "delivery_mode": "Dine-In",
-        "amount_paid": 18.50,
-        "order_date_time": "2025-01-06T12:45:00"
-      },
-      {
-        "order_id": 2002,
-        "dishes": [
-          {
-            "dish_name": "Grilled Chicken Salad",
-            "quantity": 1,
-            "vegOrNonVeg": "Non-Vegetarian"
-          },
-          {
-            "dish_name": "Lemonade",
-            "quantity": 1,
-            "vegOrNonVeg": "Vegetarian"
-          }
-        ],
-        "delivery_mode": "Takeaway",
-        "amount_paid": 12.30,
-        "order_date_time": "2025-01-05T19:30:00"
-      },
-      {
-        "order_id": 2003,
-        "dishes": [
-          {
-            "dish_name": "Spaghetti Bolognese",
-            "quantity": 1,
-            "vegOrNonVeg": "Non-Vegetarian"
-          },
-          {
-            "dish_name": "Tiramisu",
-            "quantity": 1,
-            "vegOrNonVeg": "Vegetarian"
-          }
-        ],
-        "delivery_mode": "Home Delivery",
-        "amount_paid": 22.75,
-        "order_date_time": "2025-01-04T13:15:00"
-      },
-      {
-        "order_id": 2004,
-        "dishes": [
-          {
-            "dish_name": "BBQ Chicken Wings",
-            "quantity": 2,
-            "vegOrNonVeg": "Non-Vegetarian"
-          },
-          {
-            "dish_name": "French Fries",
-            "quantity": 1,
-            "vegOrNonVeg": "Vegetarian"
-          },
-          {
-            "dish_name": "Coca-Cola",
-            "quantity": 1,
-            "vegOrNonVeg": "Vegetarian"
-          }
-        ],
-        "delivery_mode": "Dine-In",
-        "amount_paid": 16.40,
-        "order_date_time": "2025-01-03T18:50:00"
-      },
-      {
-        "order_id": 2005,
-        "dishes": [
-          {
-            "dish_name": "Vegetable Curry",
-            "quantity": 1,
-            "vegOrNonVeg": "Vegetarian"
-          },
-          {
-            "dish_name": "Steamed Rice",
-            "quantity": 1,
-            "vegOrNonVeg": "Vegetarian"
-          },
-          {
-            "dish_name": "Mango Lassi",
-            "quantity": 1,
-            "vegOrNonVeg": "Vegetarian"
-          }
-        ],
-        "delivery_mode": "Home Delivery",
-        "amount_paid": 14.20,
-        "order_date_time": "2025-01-02T20:25:00"
+import {useEffect, useState} from 'react';
+import {
+  ActivityIndicator,
+  Dimensions,
+  Image,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import {Dropdown} from 'react-native-element-dropdown';
+import {
+  orderOptions,
+  statusContainerStylesForRecentOrders,
+  statusOptions,
+  statusStylesForRecentOrders,
+} from './constance/constance';
+
+export default function RecentOrdersOfUsers({route}: any) {
+  const [allOrders, setAllOrders] = useState([]);
+  const [inputFilter, setInputFilter] = useState<string>('');
+  const [orders, setOrders] = useState([]);
+  const [dummyData, setDummyData] = useState({});
+  const [statusFilter, setStatusFilter] = useState('id');
+  const [isLoading, setIsLoading] = useState(false);
+  const [isFiltering, setIsFiltering] = useState(false);
+
+  const getAllOrders = async () => {
+    const response = await fetch('http://10.0.2.2:8000/dummyData');
+    if (response.ok) {
+      const data = await response.json();
+      return data;
+    }
+  };
+
+  useEffect(() => {
+    async function getOrders() {
+      setIsLoading(true);
+      const data = await getAllOrders();
+      setDummyData(data);
+      setAllOrders(data.orders);
+      setOrders(data.orders);
+      setIsLoading(false);
+    }
+    getOrders();
+  }, []);
+
+  useEffect(() => {
+    setIsFiltering(true);
+    const timer = setTimeout(() => {
+      if (statusFilter == 'id') {
+        const data = allOrders.filter((obj: any) =>
+          obj.order_id.toString().includes(inputFilter),
+        );
+        setOrders(data);
+      } else if (statusFilter == 'status') {
+        const data = allOrders.filter((obj: any) =>
+          obj.status.toLowerCase().includes(inputFilter.toLowerCase()),
+        );
+        setOrders(data);
+      } else if (statusFilter == 'mode') {
+        const data = allOrders.filter((obj: any) =>
+          obj.delivery_mode.toLowerCase().includes(inputFilter.toLowerCase()),
+        );
+        setOrders(data);
       }
-    ]
-  }
-  
-export default function RecentOrdersOfUsers(){
-    return(
-        <SafeAreaView style={styles.container}>
-            <Text style={{fontWeight:"bold",fontSize:21,textAlign:"center"}}>Recent order of {dummyData.name}</Text>
-            <ScrollView>
-                {dummyData.orders.map((orderObj)=>(
-                    <View style={{backgroundColor:"white",borderRadius:10,padding:10,marginTop:10,marginBottom:10}} key={orderObj.order_id}>
-                        <Text style={{fontSize:18}}>#{orderObj.order_id}</Text>
-                        <View style={{borderBottomWidth:1, borderBottomColor:"black"}}></View>
-                        {orderObj.dishes.map((dish)=>(
-                            <View key={dish.dish_name} style={{flexDirection:"row",alignItems:"center"}}>
-                                {dish.vegOrNonVeg === "Vegetarian"?
-                                <Image source={{uri:"https://upload.wikimedia.org/wikipedia/commons/thumb/b/b2/Veg_symbol.svg/2048px-Veg_symbol.svg.png"}} style={{height:20,width:20,marginRight:10}}></Image>:
-                                <Image source={{uri:"https://talksense.weebly.com/uploads/3/0/7/0/3070350/217581.jpg"}} style={{height:18,width:18,marginRight:10,marginLeft:2}}></Image>}
-                                <Text>{dish.quantity} x</Text>
-                                <Text style={{fontSize:17}}> {dish.dish_name}</Text>
-                            </View>
-                        ))}
-                    </View>
-                ))}
-            </ScrollView>
-        </SafeAreaView>
-    )
+      setIsFiltering(false);
+    }, 500);
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [inputFilter, statusFilter, allOrders]);
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <Text style={styles.headerText}>
+        Recent Orders by {route.params.name}
+      </Text>
+      <View
+        style={{flexDirection: 'row', alignItems: 'center', marginBottom: 18}}>
+        <View style={styles.inputContainer}>
+          <TextInput
+            placeholder={`Search by ${statusFilter}...`}
+            style={styles.inputBox}
+            value={inputFilter}
+            onChangeText={text => setInputFilter(text)}
+          />
+          {inputFilter.length > 0 ? (
+            <TouchableOpacity onPress={() => setInputFilter('')}>
+              <Image
+                source={{
+                  uri: 'https://static-00.iconduck.com/assets.00/cross-mark-emoji-256x256-5xa7ff4l.png',
+                }}
+                style={{marginLeft: 18, height: 14, width: 14}}
+              />
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity>
+              <Image
+                source={{
+                  uri: 'https://img.icons8.com/ios7/600/search.png',
+                }}
+                style={{height: 25, width: 25}}
+              />
+            </TouchableOpacity>
+          )}
+        </View>
+        <Dropdown
+          style={styles.dropdown}
+          data={orderOptions}
+          maxHeight={180}
+          labelField="label"
+          valueField="value"
+          placeholder="Select status"
+          value={statusFilter}
+          onChange={item => setStatusFilter(item.value)}
+          iconStyle={{marginRight: 10}}
+        />
+      </View>
+      <ScrollView showsVerticalScrollIndicator={false}>
+        {isLoading || isFiltering ? (
+          <ActivityIndicator
+            size={40}
+            style={styles.loading}></ActivityIndicator>
+        ) : orders.length > 0 ? (
+          orders.map((orderObj: any) => (
+            <View style={styles.orderCard} key={orderObj.order_id}>
+              <View
+                style={{
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                  width: '99%',
+                  alignItems: 'center',
+                }}>
+                <Text style={styles.orderId}>
+                  Order ID # {orderObj.order_id}
+                </Text>
+                <View
+                  style={statusContainerStylesForRecentOrders[orderObj.status]}>
+                  <Text style={statusStylesForRecentOrders[orderObj.status]}>
+                    {orderObj.status}
+                  </Text>
+                </View>
+              </View>
+              <Text style={styles.deliveryMode}>{orderObj.delivery_mode}</Text>
+              <Text style={styles.orderDate}>{orderObj.order_date_time}</Text>
+              <View style={styles.separator} />
+              {orderObj.dishes.map((dish: any) => (
+                <View style={styles.dishRow} key={dish.dish_name}>
+                  {dish.itemType === 'Vegetarian' ? (
+                    <Image
+                      source={{
+                        uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b2/Veg_symbol.svg/2048px-Veg_symbol.svg.png',
+                      }}
+                      style={styles.icon}
+                    />
+                  ) : (
+                    <Image
+                      source={require('../assets/image.png')}
+                      style={{height: 20, width: 20, marginRight: 10}}></Image>
+                  )}
+                  <Text style={styles.dishText}>
+                    {dish.quantity} x {dish.dish_name}
+                  </Text>
+                </View>
+              ))}
+              <View style={styles.dottedSeparator} />
+              <View style={styles.orderFooter}>
+                <Text style={styles.amountPaid}>Total</Text>
+                <Text style={styles.amountPaid}>
+                  ${orderObj.amount_paid.toFixed(2)}
+                </Text>
+              </View>
+            </View>
+          ))
+        ) : (
+          <Text style={styles.noOrdersText}>No orders found</Text>
+        )}
+      </ScrollView>
+    </SafeAreaView>
+  );
 }
 
 const styles = StyleSheet.create({
-    container:{
-        flex: 1,
-        width: Dimensions.get("screen").width,
-        padding: 10,
-        backgroundColor: "#e6e6e6",
+  noOrdersText: {
+    fontSize: 25,
+    textAlign: 'center',
+    marginTop: 200,
+    fontWeight: '600',
+  },
+  loading: {
+    marginTop: 250,
+  },
+  dropdown: {
+    borderWidth: 1,
+    height: 45,
+    paddingLeft: 10,
+    width: '32%',
+    borderRadius: 8,
+    backgroundColor: '#fff',
+    borderColor: '#ccc',
+    marginLeft: 8,
+  },
+  inputContainer: {
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '60%',
+    borderWidth: 1,
+    borderRadius: 8,
+    backgroundColor: 'white',
+    height: 45,
+    marginLeft: 8,
+  },
 
-    }
-})
+  inputBox: {
+    width: '80%',
+    fontSize: 17,
+    color: 'black',
+  },
+  container: {
+    flex: 1,
+    backgroundColor: '#f1f1f1',
+    padding: 15,
+  },
+  headerText: {
+    fontWeight: 'bold',
+    fontSize: 24,
+    textAlign: 'center',
+    marginBottom: 20,
+    color: '#333',
+  },
+  orderCard: {
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    padding: 15,
+    marginBottom: 15,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 3,
+  },
+  orderId: {
+    fontSize: 16,
+    color: 'black',
+  },
+  separator: {
+    borderBottomWidth: 1,
+    borderBottomColor: '#ccc',
+    marginVertical: 10,
+  },
+  dishRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  icon: {
+    height: 20,
+    width: 20,
+    marginRight: 10,
+  },
+  dishText: {
+    fontSize: 16,
+    color: 'black',
+  },
+  dottedSeparator: {
+    borderBottomWidth: 1,
+    borderStyle: 'dotted',
+    borderBottomColor: '#aaa',
+    marginVertical: 10,
+  },
+  orderDate: {
+    fontSize: 14,
+    color: 'black',
+  },
+  orderFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  deliveryMode: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: 'black',
+  },
+  amountPaid: {
+    fontSize: 17,
+    fontWeight: 'bold',
+    color: 'black',
+  },
+});

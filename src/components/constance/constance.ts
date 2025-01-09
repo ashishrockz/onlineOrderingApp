@@ -9,6 +9,29 @@ export const statusOptions = [
     { label: "Refunded", value: "6" },
 ];
 
+export const statusContainerStylesForRecentOrders:any = {
+  Refunded: { backgroundColor:"white",borderColor:"green",borderWidth:2,width:80,fontSize: 15,color: "black",display:"flex",flexDirection:"column",justifyContent:"center",alignItems:"center",height:24,borderRadius:10 },
+  Completed: { backgroundColor:"white",borderColor:"green",borderWidth:2,width:80,fontSize: 15,color: "black",display:"flex",flexDirection:"column",justifyContent:"center",alignItems:"center",height:24,borderRadius:10 },
+  Paid: { backgroundColor:"white",borderColor:"blue",borderWidth:2,width:80,fontSize: 16,color: "black",display:"flex",flexDirection:"column",justifyContent:"center",alignItems:"center",height:24,borderRadius:10 },
+  "Refund Initiated": { backgroundColor:"orange",borderColor:"green",borderWidth:2,width:80,fontSize: 16,color: "black",display:"flex",flexDirection:"column",justifyContent:"center",alignItems:"center",height:24,borderRadius:10 },
+  Cancelled: { backgroundColor:"white",borderColor:"red",borderWidth:2,width:80,fontSize: 16,color: "black",display:"flex",flexDirection:"column",justifyContent:"center",alignItems:"center",height:24,borderRadius:10 },
+};
+
+export const statusStylesForRecentOrders :any = {
+  Refunded: { fontSize: 13, color: "green", fontWeight: "bold" },
+  Completed: { fontSize: 13, color: "green", fontWeight: "bold" },
+  Paid: { fontSize: 13, color: "blue", fontWeight: "bold" },
+  "Refund Initiated": { fontSize: 13, color: "orange", fontWeight: "bold" },
+  Cancelled: { fontSize: 13, color: "red", fontWeight: "bold" },
+}
+
+
+export const orderOptions = [
+  { label: "ID", value: "id" },
+  { label: "Status", value: "status" },
+  { label: "Mode", value: "mode" },
+];
+
 export const statusContainerStyles:any = {
     6: { backgroundColor:"white",borderColor:"green",borderWidth:2,width:100,fontSize: 16,color: "black",display:"flex",flexDirection:"column",justifyContent:"center",alignItems:"center",height:28,borderRadius:10 },
     3: { backgroundColor:"white",borderColor:"green",borderWidth:2,width:100,fontSize: 16,color: "black",display:"flex",flexDirection:"column",justifyContent:"center",alignItems:"center",height:28,borderRadius:10 },

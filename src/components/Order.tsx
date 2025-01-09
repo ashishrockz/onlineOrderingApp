@@ -4,10 +4,19 @@ import { Dimensions, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, View
 import { Dropdown } from "react-native-element-dropdown";
 import { orderType } from "../types/type";
 import { STATUS_MAP, statusContainerStyles, statusOptions, statusStyles } from "../components/constance/constance";
-
-
+import {NativeStackNavigationProp} from '@react-navigation/native-stack';
+import { useNavigation } from "@react-navigation/native";
+type RootStackParamList = {
+    RecentOrdersOfUsers: { name: string }; 
+  };
+  
+type NavigationProp = NativeStackNavigationProp<
+  RootStackParamList,
+  'RecentOrdersOfUsers'
+>;
 
 export default function Orders() {
+    const navigation = useNavigation<NavigationProp>();
     const [inputFilter, setInputFilter] = useState<string>("");
     const [orderDetails, setOrderDetails] = useState<orderType[]>([]);
     const [filteredOrders, setFilteredOrders] = useState<orderType[]>([]);
@@ -25,7 +34,7 @@ export default function Orders() {
                 method: "GET",
                 headers: {
                     Authorization:
-                        "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7Il9pZCI6MX0sImlhdCI6MTczNjMxNjA4OH0.9EqDsdVXjRked1RYYDoxyFKqBOBzG-q2H-UPwdTpzXc",
+                        "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7Il9pZCI6MX0sImlhdCI6MTczNjM5ODk4MH0.P1qE4Gvw1ch7HyNqhLtQP_TtC--DxGSS3gI3WwJ5j5A",
                     outlet: "70",
                 },
             });
@@ -110,7 +119,7 @@ export default function Orders() {
                 method: "GET",
                 headers: {
                     Authorization:
-                        "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7Il9pZCI6MX0sImlhdCI6MTczNjMxNjA4OH0.9EqDsdVXjRked1RYYDoxyFKqBOBzG-q2H-UPwdTpzXc",
+                        "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7Il9pZCI6MX0sImlhdCI6MTczNjM5ODk4MH0.P1qE4Gvw1ch7HyNqhLtQP_TtC--DxGSS3gI3WwJ5j5A",
                     outlet: "70",
                 },
             });
@@ -174,28 +183,37 @@ export default function Orders() {
                 <ScrollView style={styles.cardWrapper}>
                     {filteredOrders?.length ? filteredOrders.map((obj: orderType, index) => (
                         <View key={index} style={styles.card}>
-                            <MenuView 
-                                onPressAction={()=>(getOrderIdDetails(obj.id))}
+                            <MenuView
+                                onPressAction={({nativeEvent}) => {
+                                const selectedId = nativeEvent.event;
+                                if (selectedId === 'View Order') {
+                                    console.log("view order");
+                                    getOrderIdDetails(obj.id)
+                                
+                                } else if (selectedId === 'Recent orders') {
+                                    console.log("recent order");
+                                    navigation.navigate("RecentOrdersOfUsers",{name:obj.Name});
+                                }
+                                }}
                                 actions={[
-                                    {
-                                        id: 'View Order',
-                                        title: 'View Order',
-                                        titleColor: 'Black',
-                                    },
-                                    {
-                                        id: 'Recent orders',
-                                        title: 'Recent Orders',
-                                        titleColor: 'Black',
-                                    },
+                                {
+                                    id: 'View Order',
+                                    title: 'View Order',
+                                    titleColor: 'Black',
+                                },
+                                {
+                                    id: 'Recent orders',
+                                    title: 'Recent Orders',
+                                    titleColor: 'Black',
+                                },
                                 ]}
                                 shouldOpenOnLongPress={false}
-                                style={{alignSelf:"flex-end"}}
-                            >
+                                style={{alignSelf: 'flex-end'}}>
                                 <Image
-                                    source={{
-                                        uri: "https://cdn-icons-png.flaticon.com/512/7066/7066144.png",
-                                    }}
-                                    style={{ height: 20, width: 20, alignSelf: "flex-end" }}
+                                source={{
+                                    uri: 'https://cdn-icons-png.flaticon.com/512/7066/7066144.png',
+                                }}
+                                style={{height: 20, width: 20, alignSelf: 'flex-end'}}
                                 />
                             </MenuView>
                             <View style={styles.valuePairs}>
