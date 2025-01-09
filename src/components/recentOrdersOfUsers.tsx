@@ -79,8 +79,7 @@ export default function RecentOrdersOfUsers({route}: any) {
       <Text style={styles.headerText}>
         Recent Orders by {route.params.name}
       </Text>
-      <View
-        style={{flexDirection: 'row', alignItems: 'center', marginBottom: 18}}>
+      <View style={styles.topBar}>
         <View style={styles.inputContainer}>
           <TextInput
             placeholder={`Search by ${statusFilter}...`}
@@ -94,7 +93,7 @@ export default function RecentOrdersOfUsers({route}: any) {
                 source={{
                   uri: 'https://static-00.iconduck.com/assets.00/cross-mark-emoji-256x256-5xa7ff4l.png',
                 }}
-                style={{marginLeft: 18, height: 14, width: 14}}
+                style={styles.clearIcon}
               />
             </TouchableOpacity>
           ) : (
@@ -103,7 +102,7 @@ export default function RecentOrdersOfUsers({route}: any) {
                 source={{
                   uri: 'https://img.icons8.com/ios7/600/search.png',
                 }}
-                style={{height: 25, width: 25}}
+                style={styles.searchIcon}
               />
             </TouchableOpacity>
           )}
@@ -117,27 +116,17 @@ export default function RecentOrdersOfUsers({route}: any) {
           placeholder="Select status"
           value={statusFilter}
           onChange={item => setStatusFilter(item.value)}
-          iconStyle={{marginRight: 10}}
+          iconStyle={styles.dropdownIcon}
         />
       </View>
       <ScrollView showsVerticalScrollIndicator={false}>
         {isLoading || isFiltering ? (
-          <ActivityIndicator
-            size={40}
-            style={styles.loading}></ActivityIndicator>
+          <ActivityIndicator size={40} style={styles.loading} />
         ) : orders.length > 0 ? (
           orders.map((orderObj: any) => (
             <View style={styles.orderCard} key={orderObj.order_id}>
-              <View
-                style={{
-                  flexDirection: 'row',
-                  justifyContent: 'space-between',
-                  width: '99%',
-                  alignItems: 'center',
-                }}>
-                <Text style={styles.orderId}>
-                  Order ID # {orderObj.order_id}
-                </Text>
+              <View style={styles.orderHeader}>
+                <Text style={styles.orderId}>Order ID # {orderObj.order_id}</Text>
                 <View
                   style={statusContainerStylesForRecentOrders[orderObj.status]}>
                   <Text style={statusStylesForRecentOrders[orderObj.status]}>
@@ -160,7 +149,8 @@ export default function RecentOrdersOfUsers({route}: any) {
                   ) : (
                     <Image
                       source={require('../assets/image.png')}
-                      style={{height: 20, width: 20, marginRight: 10}}></Image>
+                      style={styles.nonVegIcon}
+                    />
                   )}
                   <Text style={styles.dishText}>
                     {dish.quantity} x {dish.dish_name}
@@ -185,6 +175,11 @@ export default function RecentOrdersOfUsers({route}: any) {
 }
 
 const styles = StyleSheet.create({
+  topBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 18,
+  },
   noOrdersText: {
     fontSize: 25,
     textAlign: 'center',
@@ -204,8 +199,10 @@ const styles = StyleSheet.create({
     borderColor: '#ccc',
     marginLeft: 8,
   },
+  dropdownIcon: {
+    marginRight: 10,
+  },
   inputContainer: {
-    display: 'flex',
     flexDirection: 'row',
     alignItems: 'center',
     width: '60%',
@@ -215,11 +212,19 @@ const styles = StyleSheet.create({
     height: 45,
     marginLeft: 8,
   },
-
   inputBox: {
     width: '80%',
     fontSize: 17,
     color: 'black',
+  },
+  clearIcon: {
+    marginLeft: 18,
+    height: 14,
+    width: 14,
+  },
+  searchIcon: {
+    height: 25,
+    width: 25,
   },
   container: {
     flex: 1,
@@ -244,6 +249,12 @@ const styles = StyleSheet.create({
     shadowRadius: 5,
     elevation: 3,
   },
+  orderHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '99%',
+    alignItems: 'center',
+  },
   orderId: {
     fontSize: 16,
     color: 'black',
@@ -259,6 +270,11 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   icon: {
+    height: 20,
+    width: 20,
+    marginRight: 10,
+  },
+  nonVegIcon: {
     height: 20,
     width: 20,
     marginRight: 10,
