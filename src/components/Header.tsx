@@ -2,15 +2,19 @@ import {Image, SafeAreaView, StyleSheet, Text, TouchableOpacity, View} from 'rea
 import React, { useContext } from 'react';
 import ChefgaLogo from './assets/ChefgaLogo';
 import { loginToken } from '../hooks/AuthuContext';
+import AsyncStorage from '@react-native-async-storage/async-storage';
  
 const Header = () => {
-
+  const logout = async () =>{
+    await AsyncStorage.removeItem('userToken');
+    setToken(false)
+  }
   const {setToken} = useContext(loginToken);
   return (
     <SafeAreaView style={styles.container}>
       <View style={{flexDirection:'row',justifyContent:'space-between',alignItems:'center'}}>
         <ChefgaLogo />
-        <TouchableOpacity onPress={()=>(setToken(false))}>
+        <TouchableOpacity onPress={()=> logout()}>
           <Image source={require('../assets/logout.png')} style={{marginRight:8}}/>
         </TouchableOpacity>
       </View>

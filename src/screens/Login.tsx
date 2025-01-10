@@ -17,7 +17,9 @@ import React, {useContext, useEffect, useState} from 'react';
 import { loginToken } from '../hooks/AuthuContext';
 import ForgotPassword from '../components/ForgotPassword';
 const {width, height} = Dimensions.get('window');
- 
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+
 const Login = () => {
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [email, setEmail] = useState('');
@@ -37,12 +39,13 @@ const Login = () => {
       });
       if (response.ok) {
         const data = await response.json();
+        await AsyncStorage.setItem("userToken",data.data.access_token);
         setToken(true);
-        console.log(data);
+        // console.log(data.data.access_token);
       } 
     } catch (error) {
       setToken(false);
-      console.error(error);
+      // console.error(error);
       setError('An error occurred. Please try again.');
       Alert.alert("Invalid Credentials please try again")
     }
