@@ -102,8 +102,8 @@ const Login = () => {
   const validatePassword = (text: string) => {
     setPassword(text);
     const msg = passwordValidation(text);
-    setErrMsg({...errMsg, email: msg || ''});
-    setErrors({...errors, email: !!msg});
+    setErrMsg({...errMsg, password: msg || ''});
+    setErrors({...errors, password: !!msg});
   };
 
   return (
