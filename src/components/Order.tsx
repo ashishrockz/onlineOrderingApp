@@ -25,6 +25,7 @@ import {
 } from '../components/constance/constance';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {useNavigation} from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 type RootStackParamList = {
   RecentOrdersOfUsers: {name: string};
 };
@@ -48,17 +49,21 @@ export default function Orders() {
 
   const getOrderDetails = async () => {
     try {
+      const token = AsyncStorage.getItem('userToken');
       const response = await fetch('https://api.chefgaa.com/order', {
+      // const response = await fetch('http://10.0.12.113:3000/order', {
         method: 'GET',
         headers: {
-          Authorization:
-            'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7Il9pZCI6MX0sImlhdCI6MTczNjM5ODk4MH0.P1qE4Gvw1ch7HyNqhLtQP_TtC--DxGSS3gI3WwJ5j5A',
+          Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7Il9pZCI6MX0sImlhdCI6MTczNzk1MTMxOX0.0pm34c0uDD11sjBtS8JYOcSoN4GC68TciX3GEqWTp8o
+`,
           outlet: '70',
         },
       });
       if (response.ok) {
         setError('');
         const data = await response.json();
+        console.log(data);
+        
         return data.data;
       } else {
         setError('Something went wrong... Please try again');
@@ -675,7 +680,7 @@ const styles = StyleSheet.create({
   },
   filtersText: {
     fontWeight: '500',
-    fontSize: 15
+    fontSize: 15,
   },
-  menuIcon:{height: 20, width: 20, alignSelf: 'flex-end'}
+  menuIcon: {height: 20, width: 20, alignSelf: 'flex-end'},
 });
