@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 import {Dropdown} from 'react-native-element-dropdown';
 import {
+  ApiUrlConstance,
   orderOptions,
   statusContainerStylesForRecentOrders,
   statusOptions,
@@ -29,7 +30,7 @@ export default function RecentOrdersOfUsers({route}: any) {
   const [isFiltering, setIsFiltering] = useState(false);
 
   const getAllOrders = async () => {
-    const response = await fetch('http://10.0.2.2:8000/dummyData');
+    const response = await fetch(`${ApiUrlConstance.dummyDataApi}`);
     if (response.ok) {
       const data = await response.json();
       return data;

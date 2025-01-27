@@ -192,6 +192,9 @@ export const ApiUrlConstance: { [key: string]: string } = {
   promotion: 'promotion/users',
   login: 'auth/login',
   webToken:MAINWEB_TOKEN,
+  firstOutlet:'69',
+  secondOutlet:'70',
+  dummyDataApi:'http://10.0.2.2:8000/dummyData',
 };
  export const methods={
   get:"GET",
@@ -199,6 +202,7 @@ export const ApiUrlConstance: { [key: string]: string } = {
   put :"PUT",
   delete :'DELETE'
 }
+
 export const imageUrl: { [key: string]: string } = {
   into: 'https://static-00.iconduck.com/assets.00/cross-mark-emoji-256x256-5xa7ff4l.png',
   search: 'https://img.icons8.com/ios7/600/search.png',
@@ -213,5 +217,6 @@ export const errorMsgs: { [key: string]: string } = {
   something_went_wrong: 'Server error. Please try again later.',
   promotion_details_not_found: 'Promotion details not found.',
   incorrect_password:"Username and Password miss match",
-  incorrect_userName:"Username and Password miss match"
+  incorrect_userName:"Username and Password miss match",
+  catch_error:'Something went wrong... Please try again',
 };

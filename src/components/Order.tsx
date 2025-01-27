@@ -58,7 +58,7 @@ const Orders = () => {
           method:  methods.get,
           headers: {
             Authorization: `Bearer ${ApiUrlConstance.webToken}`,
-            outlet: '70',
+            outlet: ApiUrlConstance.secondOutlet,
           },
         },
       );
@@ -86,7 +86,7 @@ const Orders = () => {
         }
       }
     } catch (error) {
-      setError('Something went wrong... Please try again');
+      setError(errorMsgs.catch_error);
       console.error('Error fetching order details:', error);
     }
   };
@@ -100,7 +100,6 @@ const Orders = () => {
   };
 
   const formatDate = (dateString: string) => {
-    if (!dateString) return 'Invalid Date';
     const [year, month, day] = dateString?.split('-');
     return `${month}/${day}/${year}`;
   };
@@ -149,7 +148,7 @@ const Orders = () => {
     );
   }
 
-  async function getOrderIdDetails(id: number) {
+  const getOrderIdDetails= async(id: number) => {
     setModalVisible(!isModalVisible);
     try {
       const url = `${ApiUrlConstance.chefgaApiUrl}/${ApiUrlConstance.order}/${id}`;
@@ -157,7 +156,7 @@ const Orders = () => {
         method:  methods.get,
         headers: {
           Authorization: `Bearer ${ApiUrlConstance.webToken}`,
-          outlet: '70',
+          outlet: ApiUrlConstance.secondOutlet,
         },
       });
       if (response.ok) {
@@ -182,7 +181,7 @@ const Orders = () => {
         }
       }
     } catch (error) {
-      setError('Something went wrong... Please try again');
+      setError(errorMsgs.catch_error);
       console.error('Error fetching order details:', error);
     }
   }

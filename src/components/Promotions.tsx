@@ -22,18 +22,20 @@ const Promotions = () => {
  
    const getPromotionsDetails = async () => {
     try {
-      const token = AsyncStorage.getItem('userToken');
+      const token =  await AsyncStorage.getItem('userToken');
       const response = await fetch(`${ApiUrlConstance.apiUrl}/${ApiUrlConstance.promotion}`, {
         method: methods.get,
         headers: {
           Authorization: `Bearer ${token}`,
-          outlet: '69',
+          outlet: ApiUrlConstance.firstOutlet,
         },
       });
       if (response.ok) {
         setError('');
         const data = await response.json();
-        console.log(data);
+        setData(data);
+        setFilteredData(data);
+        // console.log(data);
         
         return data.data;
       } else {
@@ -54,7 +56,7 @@ const Promotions = () => {
         }
       }
     } catch (error) {
-      setError('Something went wrong... Please try again');
+      setError(errorMsgs.catch_error);
       console.error('Error fetching Promotions details:', error);
     }
   };    
