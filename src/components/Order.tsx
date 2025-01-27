@@ -23,12 +23,13 @@ import {
   statusOptions,
   statusStyles,
   ApiUrlConstance,
-  errorMsgs,
+  errorMessage,
   methods,
+  statusmode,
 } from '../constance/constance';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {useNavigation} from '@react-navigation/native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { twelveHoursFormat,formatDate } from '../hooks/helpers';
 type RootStackParamList = {
   RecentOrdersOfUsers: {name: string};
 };
@@ -40,76 +41,75 @@ type NavigationProp = NativeStackNavigationProp<
 const Orders = () => {
   const navigation = useNavigation<NavigationProp>();
   const [inputFilter, setInputFilter] = useState<string>('');
-  const [orderDetails, setOrderDetails] = useState<orderType[]>([]);
+  const [orderList, setOrderList] = useState<orderType[]>([]);
   const [filteredOrders, setFilteredOrders] = useState<orderType[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [statusFilter, setStatusFilter] = useState<string>(statusmode?.all);
   const [isModalVisible, setModalVisible] = useState(false);
   const [viewOrderDetails, setViewOrderDetails] = useState<any[]>([]);
   const [isFiltering, setIsFiltering] = useState(false);
 
   const getOrderDetails = async () => {
     try {
-      const token = AsyncStorage.getItem('userToken');
       const response = await fetch(
-        `${ApiUrlConstance.chefgaApiUrl}/${ApiUrlConstance.order}`,
+        `${ApiUrlConstance?.chefgaApiUrl}/${ApiUrlConstance?.order}`,
         {
-          method:  methods.get,
+          method:  methods?.get,
           headers: {
-            Authorization: `Bearer ${ApiUrlConstance.webToken}`,
-            outlet: ApiUrlConstance.secondOutlet,
+            Authorization: `${ApiUrlConstance?.bearer} ${ApiUrlConstance?.webToken}`,
+            outlet: ApiUrlConstance?.secondOutlet,
           },
         },
       );
-      if (response.ok) {
+      if (response?.ok) {
         setError('');
-        const data = await response.json();
+        const responseData = await response.json();
         // console.log(data);
 
-        return data.data;
+        return responseData?.data;
       } else {
         const responseData = await response.json();
-        switch (responseData.msg) {
-          case errorMsgs.unauthorized_access:
-            setError(errorMsgs.unauthorized_access);
+        switch (responseData?.msg) {
+          case errorMessage?.unauthorized_access:
+            setError(errorMessage?.unauthorized_access);
             break;
-          case errorMsgs.order_details_not_found:
-            setError(errorMsgs.order_details_not_found);
+          case errorMessage?.order_details_not_found:
+            setError(errorMessage?.order_details_not_found);
             break;
-          case errorMsgs.something_went_wrong:
-            setError(errorMsgs.something_went_wrong);
+          case errorMessage?.something_went_wrong:
+            setError(errorMessage?.something_went_wrong);
             break;
           default:
-            setError(errorMsgs.something_went_wrong);
+            setError(errorMessage?.something_went_wrong);
             break;
         }
       }
     } catch (error) {
-      setError(errorMsgs.catch_error);
+      setError(errorMessage?.catch_error);
       console.error('Error fetching order details:', error);
     }
   };
 
-  const formatTimeToAMorPM = (time: string) => {
-    const [hours, minutes] = time.split(':');
-    const hour = parseInt(hours);
-    const meridian = hour >= 12 ? 'PM' : 'AM';
-    const formattedHour = hour % 12 || 12;
-    return `${formattedHour}:${minutes} ${meridian}`;
-  };
+  // const twelveHoursFormat = (time: string) => {
+  //   const [hours, minutes] = time.split(':');
+  //   const hour = parseInt(hours);
+  //   const meridian = hour >= 12 ? 'PM' : 'AM';
+  //   const formattedHour = hour % 12 || 12;
+  //   return `${formattedHour}:${minutes} ${meridian}`;
+  // };
 
-  const formatDate = (dateString: string) => {
-    const [year, month, day] = dateString?.split('-');
-    return `${month}/${day}/${year}`;
-  };
+  // const formatDate = (dateString: string) => {
+  //   const [year, month, day] = dateString?.split('-');
+  //   return `${month}/${day}/${year}`;
+  // };
 
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
       const fetchedData = await getOrderDetails();
       if (fetchedData) {
-        setOrderDetails(fetchedData);
+        setOrderList(fetchedData);
         setFilteredOrders(fetchedData);
       }
       setIsLoading(false);
@@ -121,12 +121,12 @@ const Orders = () => {
   useEffect(() => {
     setIsFiltering(true);
     const timer = setTimeout(() => {
-      const filteredByGlobal = orderDetails.filter(orderObj =>
-        orderObj.Name.toLowerCase().includes(inputFilter.trim().toLowerCase()),
+      const filteredByGlobal = orderList?.filter(orderObj =>
+        orderObj?.Name?.toLowerCase().includes(inputFilter.trim().toLowerCase()),
       );
-      if (statusFilter !== 'all') {
-        const filteredByStatus = filteredByGlobal.filter(
-          orderObj => orderObj.status.toString() === statusFilter,
+      if (statusFilter !== statusmode?.all) {
+        const filteredByStatus = filteredByGlobal?.filter(
+          orderObj => orderObj?.status.toString() === statusFilter,
         );
         setFilteredOrders(filteredByStatus);
       } else {
@@ -138,7 +138,7 @@ const Orders = () => {
     return () => {
       clearTimeout(timer);
     };
-  }, [inputFilter, statusFilter, orderDetails]);
+  }, [inputFilter, statusFilter, orderList]);
 
   if (error) {
     return (
@@ -151,37 +151,37 @@ const Orders = () => {
   const getOrderIdDetails= async(id: number) => {
     setModalVisible(!isModalVisible);
     try {
-      const url = `${ApiUrlConstance.chefgaApiUrl}/${ApiUrlConstance.order}/${id}`;
+      const url = `${ApiUrlConstance?.chefgaApiUrl}/${ApiUrlConstance?.order}/${id}`;
       const response = await fetch(url, {
-        method:  methods.get,
+        method:  methods?.get,
         headers: {
-          Authorization: `Bearer ${ApiUrlConstance.webToken}`,
-          outlet: ApiUrlConstance.secondOutlet,
+          Authorization: `${ApiUrlConstance?.bearer} ${ApiUrlConstance?.webToken}`,
+          outlet: ApiUrlConstance?.secondOutlet,
         },
       });
       if (response.ok) {
         setError('');
-        const data = await response.json();
-        setViewOrderDetails(data.data);
+        const responseData = await response.json();
+        setViewOrderDetails(responseData?.data);
       } else {
         const responseData = await response.json();
-        switch (responseData.msg) {
-          case errorMsgs.unauthorized_access:
-            setError(errorMsgs.unauthorized_access);
+        switch (responseData?.msg) {
+          case errorMessage?.unauthorized_access:
+            setError(errorMessage?.unauthorized_access);
             break;
-          case errorMsgs.order_details_not_found_for_id:
-            setError(errorMsgs.order_details_not_found_for_id);
+          case errorMessage?.order_details_not_found_for_id:
+            setError(errorMessage?.order_details_not_found_for_id);
             break;
-          case errorMsgs.something_went_wrong:
-            setError(errorMsgs.something_went_wrong);
+          case errorMessage?.something_went_wrong:
+            setError(errorMessage?.something_went_wrong);
             break;
           default:
-            setError(errorMsgs.something_went_wrong);
+            setError(errorMessage?.something_went_wrong);
             break;
         }
       }
     } catch (error) {
-      setError(errorMsgs.catch_error);
+      setError(errorMessage?.catch_error);
       console.error('Error fetching order details:', error);
     }
   }
@@ -275,46 +275,46 @@ const Orders = () => {
                 <View style={styles.valuePairs}>
                   <Text style={styles.label}>Order ID</Text>
                   <Text style={styles.colon}>:</Text>
-                  <Text style={styles.cardText}>{obj.id}</Text>
+                  <Text style={styles.cardText}>{obj?.id}</Text>
                 </View>
                 <View style={styles.valuePairs}>
                   <Text style={styles.label}>Name</Text>
                   <Text style={styles.colon}>:</Text>
-                  <Text style={styles.cardText}>{obj.Name}</Text>
+                  <Text style={styles.cardText}>{obj?.Name}</Text>
                 </View>
                 <View style={styles.valuePairs}>
                   <Text style={styles.label}>To Be Fulfilled On</Text>
                   <Text style={styles.colon}>:</Text>
                   <Text style={styles.cardText}>
-                    {formatDate(obj.date)} at {formatTimeToAMorPM(obj.time)}
+                    {formatDate(obj?.date)} at {twelveHoursFormat(obj?.time)}
                   </Text>
                 </View>
                 <View style={styles.valuePairs}>
                   <Text style={styles.label}>Email</Text>
                   <Text style={styles.colon}>:</Text>
-                  <Text style={styles.cardText}>{obj.email}</Text>
+                  <Text style={styles.cardText}>{obj?.email}</Text>
                 </View>
                 <View style={styles.valuePairs}>
                   <Text style={styles.label}>Order Type</Text>
                   <Text style={styles.colon}>:</Text>
-                  <Text style={styles.cardText}>{obj.type}</Text>
+                  <Text style={styles.cardText}>{obj?.type}</Text>
                 </View>
                 <View style={styles.valuePairs}>
                   <Text style={styles.label}>Amount</Text>
                   <Text style={styles.colon}>:</Text>
-                  <Text style={styles.cardText}>${obj.Amount}</Text>
+                  <Text style={styles.cardText}>${obj?.Amount}</Text>
                 </View>
                 <View style={styles.valuePairs}>
                   <Text style={styles.label}>Status</Text>
                   <Text style={styles.colon}>:</Text>
-                  <View style={statusContainerStyles[obj.status]}>
-                    <Text style={statusStyles[obj.status]}>
-                      {STATUS_MAP[obj.status]?.label}
+                  <View style={statusContainerStyles[obj?.status]}>
+                    <Text style={statusStyles[obj?.status]}>
+                      {STATUS_MAP?.[obj?.status]?.label}
                     </Text>
                   </View>
                 </View>
                 {/* <TouchableOpacity onPress={() => {
-                                getOrderIdDetails(obj.id);
+                                getOrderIdDetails(obj?.id);
                             }} style={{ alignSelf: "center", backgroundColor: "#234afa", padding: 8, borderRadius: 8 }}>
                                 <Text style={{ color: "white", fontWeight: "bold", fontSize: 16 }}>View Order</Text>
                             </TouchableOpacity> */}
@@ -347,19 +347,19 @@ const Orders = () => {
                   <View style={styles.customerInfoRow}>
                     <Text style={styles.customerLabel}>Name:</Text>
                     <Text style={styles.value}>
-                      {viewOrderDetails[0]?.customer_details.name}
+                      {viewOrderDetails?.[0]?.customer_details?.name}
                     </Text>
                   </View>
                   <View style={styles.customerInfoRow}>
                     <Text style={styles.customerLabel}>Email:</Text>
                     <Text style={styles.value}>
-                      {viewOrderDetails[0]?.customer_details.email}
+                      {viewOrderDetails?.[0]?.customer_details?.email}
                     </Text>
                   </View>
                   <View style={styles.customerInfoRow}>
                     <Text style={styles.customerLabel}>Phone:</Text>
                     <Text style={styles.value}>
-                      {viewOrderDetails[0]?.customer_details.mobile_no}
+                      {viewOrderDetails?.[0]?.customer_details?.mobile_no}
                     </Text>
                   </View>
 
@@ -367,15 +367,15 @@ const Orders = () => {
                     style={[styles.sectionTitle, styles.sectionTitleUpdated]}>
                     Order Items
                   </Text>
-                  {viewOrderDetails[0]?.CartItems.map(
+                  {viewOrderDetails?.[0]?.CartItems.map(
                     (cartItems: any, index: number) => (
                       <View key={index} style={styles.orderItemRow}>
                         <Text style={styles.orderItemName}>
-                          {cartItems.display_name} X{' '}
-                          {Number(cartItems.quantity)}
+                          {cartItems?.display_name} X{' '}
+                          {Number(cartItems?.quantity)}
                         </Text>
                         <Text style={styles.orderItemPrice}>
-                          ${cartItems.price}
+                          ${cartItems?.price}
                         </Text>
                       </View>
                     ),
@@ -386,27 +386,27 @@ const Orders = () => {
                   <View style={styles.summaryRow}>
                     <Text style={styles.label}>Subtotal:</Text>
                     <Text style={styles.value}>
-                      ${viewOrderDetails[0]?.sub_total}
+                      ${viewOrderDetails?.[0]?.sub_total}
                     </Text>
                   </View>
                   <View style={styles.summaryRow}>
                     <Text style={styles.label}>Tax:</Text>
                     <Text style={styles.value}>
-                      ${viewOrderDetails[0]?.tax}
+                      ${viewOrderDetails?.[0]?.tax}
                     </Text>
                   </View>
                   {viewOrderDetails[0]?.delivery_fee && (
                     <View style={styles.summaryRow}>
                       <Text style={styles.label}>Delivery Fee:</Text>
                       <Text style={styles.value}>
-                        ${viewOrderDetails[0]?.delivery_fee}
+                        ${viewOrderDetails?.[0]?.delivery_fee}
                       </Text>
                     </View>
                   )}
                   <View style={styles.summaryRow}>
                     <Text style={styles.total}>Total:</Text>
                     <Text style={styles.totalValue}>
-                      ${viewOrderDetails[0]?.total}
+                      ${viewOrderDetails?.[0]?.total}
                     </Text>
                   </View>
 
@@ -417,26 +417,23 @@ const Orders = () => {
                   <View style={styles.infoRow}>
                     <Text style={styles.label1}>Order Type:</Text>
                     <Text style={styles.value}>
-                      {' '}
-                      {viewOrderDetails[0]?.OrderTypeDefinition.Type}
+                      {viewOrderDetails?.[0]?.OrderTypeDefinition.Type}
                     </Text>
                   </View>
                   <View style={styles.infoRow}>
                     <Text style={styles.label1}>Schedule Date:</Text>
                     <Text style={styles.value}>
-                      {' '}
                       {new Date(
-                        viewOrderDetails[0]?.created_at * 1000,
+                        viewOrderDetails?.[0]?.created_at * 1000,
                       ).toLocaleDateString()}
                     </Text>
                   </View>
                   <View style={styles.infoRow}>
                     <Text style={styles.label1}>Schedule Time:</Text>
                     <Text style={styles.value}>
-                      {' '}
-                      {formatTimeToAMorPM(
+                      {twelveHoursFormat(
                         new Date(
-                          viewOrderDetails[0]?.created_at * 1000,
+                          viewOrderDetails?.[0]?.created_at * 1000,
                         ).toLocaleTimeString(),
                       )}
                     </Text>

@@ -24,7 +24,7 @@ const ForgotPassword = () => {
         animationType="slide"
         transparent={true}
         visible={forgotPasswordModal}
-        onRequestClose={() => setForgotPasswordModal(false)} // Handles hardware back press for Android
+        onRequestClose={() => setForgotPasswordModal(false)} 
       >
         <View style={styles.centeredView}>
           <View style={styles.modalView}>

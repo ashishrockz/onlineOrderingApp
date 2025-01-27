@@ -16,6 +16,7 @@ import {
   ApiUrlConstance,
   orderOptions,
   statusContainerStylesForRecentOrders,
+  statusmode,
   statusOptions,
   statusStylesForRecentOrders,
 } from '../constance/constance';
@@ -30,20 +31,20 @@ export default function RecentOrdersOfUsers({route}: any) {
   const [isFiltering, setIsFiltering] = useState(false);
 
   const getAllOrders = async () => {
-    const response = await fetch(`${ApiUrlConstance.dummyDataApi}`);
+    const response = await fetch(`${ApiUrlConstance?.dummyDataApi}`);
     if (response.ok) {
-      const data = await response.json();
-      return data;
+      const responseData = await response.json();
+      return responseData;
     }
   };
 
   useEffect(() => {
     async function getOrders() {
       setIsLoading(true);
-      const data = await getAllOrders();
-      setDummyData(data);
-      setAllOrders(data.orders);
-      setOrders(data.orders);
+      const responseData = await getAllOrders();
+      setDummyData(responseData);
+      setAllOrders(responseData.orders);
+      setOrders(responseData.orders);
       setIsLoading(false);
     }
     getOrders();
@@ -52,19 +53,19 @@ export default function RecentOrdersOfUsers({route}: any) {
   useEffect(() => {
     setIsFiltering(true);
     const timer = setTimeout(() => {
-      if (statusFilter == 'id') {
+      if (statusFilter == statusmode?.id) {
         const data = allOrders.filter((obj: any) =>
-          obj.order_id.toString().includes(inputFilter),
+          obj?.order_id.toString().includes(inputFilter),
         );
         setOrders(data);
-      } else if (statusFilter == 'status') {
+      } else if (statusFilter == statusmode?.status) {
         const data = allOrders.filter((obj: any) =>
-          obj.status.toLowerCase().includes(inputFilter.toLowerCase()),
+          obj?.status.toLowerCase().includes(inputFilter.toLowerCase()),
         );
         setOrders(data);
-      } else if (statusFilter == 'mode') {
+      } else if (statusFilter == statusmode?.mode) {
         const data = allOrders.filter((obj: any) =>
-          obj.delivery_mode.toLowerCase().includes(inputFilter.toLowerCase()),
+          obj?.delivery_mode.toLowerCase().includes(inputFilter.toLowerCase()),
         );
         setOrders(data);
       }
@@ -78,7 +79,7 @@ export default function RecentOrdersOfUsers({route}: any) {
   return (
     <SafeAreaView style={styles.container}>
       <Text style={styles.headerText}>
-        Recent Orders by {route.params.name}
+        Recent Orders by {route?.params?.name}
       </Text>
       <View style={styles.topBar}>
         <View style={styles.inputContainer}>
@@ -125,18 +126,18 @@ export default function RecentOrdersOfUsers({route}: any) {
           <ActivityIndicator size={40} style={styles.loading} />
         ) : orders.length > 0 ? (
           orders.map((orderObj: any) => (
-            <View style={styles.orderCard} key={orderObj.order_id}>
+            <View style={styles.orderCard} key={orderObj?.order_id}>
               <View style={styles.orderHeader}>
-                <Text style={styles.orderId}>Order ID # {orderObj.order_id}</Text>
+                <Text style={styles.orderId}>Order ID # {orderObj?.order_id}</Text>
                 <View
-                  style={statusContainerStylesForRecentOrders[orderObj.status]}>
-                  <Text style={statusStylesForRecentOrders[orderObj.status]}>
-                    {orderObj.status}
+                  style={statusContainerStylesForRecentOrders[orderObj?.status]}>
+                  <Text style={statusStylesForRecentOrders[orderObj?.status]}>
+                    {orderObj?.status}
                   </Text>
                 </View>
               </View>
-              <Text style={styles.deliveryMode}>{orderObj.delivery_mode}</Text>
-              <Text style={styles.orderDate}>{orderObj.order_date_time}</Text>
+              <Text style={styles.deliveryMode}>{orderObj?.delivery_mode}</Text>
+              <Text style={styles.orderDate}>{orderObj?.order_date_time}</Text>
               <View style={styles.separator} />
               {orderObj.dishes.map((dish: any) => (
                 <View style={styles.dishRow} key={dish.dish_name}>
@@ -154,7 +155,7 @@ export default function RecentOrdersOfUsers({route}: any) {
                     />
                   )}
                   <Text style={styles.dishText}>
-                    {dish.quantity} x {dish.dish_name}
+                    {dish?.quantity} x {dish?.dish_name}
                   </Text>
                 </View>
               ))}
@@ -162,7 +163,7 @@ export default function RecentOrdersOfUsers({route}: any) {
               <View style={styles.orderFooter}>
                 <Text style={styles.amountPaid}>Total</Text>
                 <Text style={styles.amountPaid}>
-                  ${orderObj.amount_paid.toFixed(2)}
+                  ${orderObj?.amount_paid.toFixed(2)}
                 </Text>
               </View>
             </View>

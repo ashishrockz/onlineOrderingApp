@@ -11,52 +11,52 @@ import {
   Image,
 } from 'react-native';
 import { PromotionsData } from '../types/type';
-import { ApiUrlConstance, errorMsgs, methods } from '../constance/constance';
+import { ApiUrlConstance, errorMessage, methods } from '../constance/constance';
  
  
 const Promotions = () => {
   const [inputFilter, setInputFilter] = useState<string>('');
   const [filteredData, setFilteredData] = useState([]);
-  const [data, setData] = useState([]);
+  const [promotionData, setPromotionData] = useState([]);
   const [error, setError] = useState('');
  
    const getPromotionsDetails = async () => {
     try {
       const token =  await AsyncStorage.getItem('userToken');
-      const response = await fetch(`${ApiUrlConstance.apiUrl}/${ApiUrlConstance.promotion}`, {
-        method: methods.get,
+      const response = await fetch(`${ApiUrlConstance?.apiUrl}/${ApiUrlConstance?.promotion}`, {
+        method: methods?.get,
         headers: {
-          Authorization: `Bearer ${token}`,
-          outlet: ApiUrlConstance.firstOutlet,
+          Authorization: `${ApiUrlConstance?.bearer} ${token}`,
+          outlet: ApiUrlConstance?.firstOutlet,
         },
       });
       if (response.ok) {
         setError('');
-        const data = await response.json();
-        setData(data);
-        setFilteredData(data);
+        const responceData = await response.json();
+        setPromotionData(responceData);
+        setFilteredData(responceData);
         // console.log(data);
         
-        return data.data;
+        return responceData?.data;
       } else {
         const responseData = await response.json();
-        switch (responseData.msg) {
-          case errorMsgs.unauthorized_access:
-            setError(errorMsgs.unauthorized_access);
+        switch (responseData?.msg) {
+          case errorMessage?.unauthorized_access:
+            setError(errorMessage?.unauthorized_access);
             break;
-          case errorMsgs.promotion_details_not_found:
-            setError(errorMsgs.promotion_details_not_found);
+          case errorMessage?.promotion_details_not_found:
+            setError(errorMessage?.promotion_details_not_found);
             break;
-          case errorMsgs.something_went_wrong:
-            setError(errorMsgs.something_went_wrong);
+          case errorMessage?.something_went_wrong:
+            setError(errorMessage?.something_went_wrong);
             break;
           default:
-            setError(errorMsgs.something_went_wrong);
+            setError(errorMessage?.something_went_wrong);
             break;
         }
       }
     } catch (error) {
-      setError(errorMsgs.catch_error);
+      setError(errorMessage?.catch_error);
       console.error('Error fetching Promotions details:', error);
     }
   };    
@@ -66,39 +66,39 @@ const Promotions = () => {
   }, []);
  
   useEffect(() => {
-    const filteredDataOfUser = data.filter((user: PromotionsData) => {
+    const filteredDataOfUser = promotionData.filter((user: PromotionsData) => {
       const searchString = inputFilter.toLowerCase();
       return (
-        user.name.toLowerCase().includes(searchString) ||
-        user.phone_number.toLowerCase().includes(searchString) ||
-        user.email.toLowerCase().includes(searchString) ||
-        user.discount_code.toLowerCase().includes(searchString)
+        user?.name.toLowerCase().includes(searchString) ||
+        user?.phone_number.toLowerCase().includes(searchString) ||
+        user?.email.toLowerCase().includes(searchString) ||
+        user?.discount_code.toLowerCase().includes(searchString)
       );
     });
     setFilteredData(filteredDataOfUser);
-  }, [inputFilter, data]);
+  }, [inputFilter, promotionData]);
  
   const renderCard = ({ item }: { item: PromotionsData }) => (
     <View style={styles.card}>
       <View style={styles.cardDetailsContainer}>
         <Text style={styles.cardHeading}>Name:</Text>
-        <Text style={styles.cardDetail}>{item.name}</Text>
+        <Text style={styles.cardDetail}>{item?.name}</Text>
       </View>
       <View style={styles.cardDetailsContainer}>
         <Text style={styles.cardHeading}>Phone:</Text>
-        <Text style={styles.cardDetail}>{item.phone_number}</Text>
+        <Text style={styles.cardDetail}>{item?.phone_number}</Text>
       </View>
       <View style={styles.cardDetailsContainer}>
         <Text style={styles.cardHeading}>Email:</Text>
-        <Text style={styles.cardDetail}>{item.email}</Text>
+        <Text style={styles.cardDetail}>{item?.email}</Text>
       </View>
       <View style={styles.cardDetailsContainer}>
         <Text style={styles.cardHeading}>Code:</Text>
-        <Text style={styles.cardDetail}>{item.discount_code}</Text>
+        <Text style={styles.cardDetail}>{item?.discount_code}</Text>
       </View>
       <View style={styles.cardDetailsContainer}>
         <Text style={styles.cardHeading}>Discount:</Text>
-        <Text style={styles.cardDetail}>{item.discount_percentage}%</Text>
+        <Text style={styles.cardDetail}>{item?.discount_percentage}%</Text>
       </View>
       <View style={styles.cardDetailsContainer}>
         <Text style={styles.cardHeading}>Registered On:</Text>
@@ -140,7 +140,7 @@ const Promotions = () => {
           )}
         </View>
         <Text style={styles.registrationText}>
-          Total Registrations: {data.length}
+          Total Registrations: {promotionData?.length}
         </Text>
       </View>
       <FlatList

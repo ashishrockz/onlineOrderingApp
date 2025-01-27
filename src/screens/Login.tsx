@@ -18,7 +18,7 @@ import {loginToken} from '../hooks/AuthuContext';
 import ForgotPassword from '../components/ForgotPassword';
 const {width, height} = Dimensions.get('window');
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {errorMsgs,ApiUrlConstance, methods} from '../constance/constance';
+import {errorMessage,ApiUrlConstance, methods} from '../constance/constance';
 
 const Login = () => {
   const [passwordVisible, setPasswordVisible] = useState(false);
@@ -30,29 +30,29 @@ const Login = () => {
   const {setToken} = useContext(loginToken);
   const handelSubmit = async () => {
     try {
-      const response = await fetch(`${ApiUrlConstance.apiUrl}/${ApiUrlConstance.login}`, {
-        method:  methods.post,
+      const response = await fetch(`${ApiUrlConstance?.apiUrl}/${ApiUrlConstance?.login}`, {
+        method:  methods?.post,
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({username: email, password}),
       });
       if (response.ok) {
-        const data = await response.json();
-        await AsyncStorage.setItem('userToken', data.data.access_token);
+        const responceData = await response.json();
+        await AsyncStorage.setItem('userToken', responceData?.data.access_token);
         setToken(true);
         // console.log(data.data.access_token);
       } else {
         const responseData = await response.json();
-        switch (responseData.message) {
-          case errorMsgs.incorrect_password:
-            setError(errorMsgs.incorrect_password);
+        switch (responseData?.message) {
+          case errorMessage?.incorrect_password:
+            setError(errorMessage?.incorrect_password);
             break;
-          case errorMsgs.incoorrect_userName:
-            setError(errorMsgs.incoorrect_userName);
+          case errorMessage?.incoorrect_userName:
+            setError(errorMessage?.incoorrect_userName);
             break;
           default:
-            setError(errorMsgs.something_went_wrong);
+            setError(errorMessage?.something_went_wrong);
             break;
         }
       }
@@ -81,7 +81,7 @@ const Login = () => {
 
   const passwordValidation = (text: string) => {
     if (!text) {
-      return 'Email is required';
+      return 'passwors is required';
     } else if (text.length < 8) {
       return 'Password must be at least 8 characters.';
     } else if (/\s/.test(text)) {
@@ -95,25 +95,15 @@ const Login = () => {
   const validateEmail = (text: string) => {
     setEmail(text);
     const msg = emailValidation(text);
-    if (msg) {
-      setErrMsg({...errMsg, email: msg});
-      setErrors({...errors, email: true});
-    } else {
-      setErrMsg({...errMsg, email: ''});
-      setErrors({...errors, email: false});
-    }
-  };
+    setErrMsg({...errMsg, email: msg || ''});
+    setErrors({...errors, email: !!msg});
+};
 
   const validatePassword = (text: string) => {
     setPassword(text);
     const msg = passwordValidation(text);
-    if (msg) {
-      setErrMsg({...errMsg, password: msg});
-      setErrors({...errors, password: true});
-    } else {
-      setErrMsg({...errMsg, password: ''});
-      setErrors({...errors, password: false});
-    }
+    setErrMsg({...errMsg, email: msg || ''});
+    setErrors({...errors, email: !!msg});
   };
 
   return (

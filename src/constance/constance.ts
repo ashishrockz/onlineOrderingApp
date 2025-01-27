@@ -195,6 +195,7 @@ export const ApiUrlConstance: { [key: string]: string } = {
   firstOutlet:'69',
   secondOutlet:'70',
   dummyDataApi:'http://10.0.2.2:8000/dummyData',
+  bearer:'Bearer',
 };
  export const methods={
   get:"GET",
@@ -202,7 +203,12 @@ export const ApiUrlConstance: { [key: string]: string } = {
   put :"PUT",
   delete :'DELETE'
 }
-
+export const statusmode ={
+  all :'all',
+  status:'status',
+  id :'id',
+  mode:'mode',
+}
 export const imageUrl: { [key: string]: string } = {
   into: 'https://static-00.iconduck.com/assets.00/cross-mark-emoji-256x256-5xa7ff4l.png',
   search: 'https://img.icons8.com/ios7/600/search.png',
@@ -210,7 +216,7 @@ export const imageUrl: { [key: string]: string } = {
   vegIcon: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b2/Veg_symbol.svg/2048px-Veg_symbol.svg.png',
 };
  
-export const errorMsgs: { [key: string]: string } = {
+export const errorMessage: { [key: string]: string } = {
   order_details_not_found: 'Order details not found.',
   order_details_not_found_for_id: 'Order details of this id not found.',
   unauthorized_access: 'Unauthorized access. Please log in again.',
