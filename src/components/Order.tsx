@@ -22,7 +22,10 @@ import {
   statusContainerStyles,
   statusOptions,
   statusStyles,
-} from '../components/constance/constance';
+  ApiUrlConstance,
+  errorMsgs,
+  methods,
+} from '../constance/constance';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {useNavigation} from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -34,8 +37,7 @@ type NavigationProp = NativeStackNavigationProp<
   RootStackParamList,
   'RecentOrdersOfUsers'
 >;
-
-export default function Orders() {
+const Orders = () => {
   const navigation = useNavigation<NavigationProp>();
   const [inputFilter, setInputFilter] = useState<string>('');
   const [orderDetails, setOrderDetails] = useState<orderType[]>([]);
@@ -50,23 +52,38 @@ export default function Orders() {
   const getOrderDetails = async () => {
     try {
       const token = AsyncStorage.getItem('userToken');
-      const response = await fetch('https://api.chefgaa.com/order', {
-      // const response = await fetch('http://10.0.12.113:3000/order', {
-        method: 'GET',
-        headers: {
-          Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7Il9pZCI6MX0sImlhdCI6MTczNzk1MTMxOX0.0pm34c0uDD11sjBtS8JYOcSoN4GC68TciX3GEqWTp8o
-`,
-          outlet: '70',
+      const response = await fetch(
+        `${ApiUrlConstance.chefgaApiUrl}/${ApiUrlConstance.order}`,
+        {
+          method:  methods.get,
+          headers: {
+            Authorization: `Bearer ${ApiUrlConstance.webToken}`,
+            outlet: '70',
+          },
         },
-      });
+      );
       if (response.ok) {
         setError('');
         const data = await response.json();
-        console.log(data);
-        
+        // console.log(data);
+
         return data.data;
       } else {
-        setError('Something went wrong... Please try again');
+        const responseData = await response.json();
+        switch (responseData.msg) {
+          case errorMsgs.unauthorized_access:
+            setError(errorMsgs.unauthorized_access);
+            break;
+          case errorMsgs.order_details_not_found:
+            setError(errorMsgs.order_details_not_found);
+            break;
+          case errorMsgs.something_went_wrong:
+            setError(errorMsgs.something_went_wrong);
+            break;
+          default:
+            setError(errorMsgs.something_went_wrong);
+            break;
+        }
       }
     } catch (error) {
       setError('Something went wrong... Please try again');
@@ -135,12 +152,11 @@ export default function Orders() {
   async function getOrderIdDetails(id: number) {
     setModalVisible(!isModalVisible);
     try {
-      const url = `https://api.chefgaa.com/order/${id}`;
+      const url = `${ApiUrlConstance.chefgaApiUrl}/${ApiUrlConstance.order}/${id}`;
       const response = await fetch(url, {
-        method: 'GET',
+        method:  methods.get,
         headers: {
-          Authorization:
-            'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7Il9pZCI6MX0sImlhdCI6MTczNjM5ODk4MH0.P1qE4Gvw1ch7HyNqhLtQP_TtC--DxGSS3gI3WwJ5j5A',
+          Authorization: `Bearer ${ApiUrlConstance.webToken}`,
           outlet: '70',
         },
       });
@@ -149,7 +165,21 @@ export default function Orders() {
         const data = await response.json();
         setViewOrderDetails(data.data);
       } else {
-        setError('Something went wrong... Please try again');
+        const responseData = await response.json();
+        switch (responseData.msg) {
+          case errorMsgs.unauthorized_access:
+            setError(errorMsgs.unauthorized_access);
+            break;
+          case errorMsgs.order_details_not_found_for_id:
+            setError(errorMsgs.order_details_not_found_for_id);
+            break;
+          case errorMsgs.something_went_wrong:
+            setError(errorMsgs.something_went_wrong);
+            break;
+          default:
+            setError(errorMsgs.something_went_wrong);
+            break;
+        }
       }
     } catch (error) {
       setError('Something went wrong... Please try again');
@@ -318,21 +348,18 @@ export default function Orders() {
                   <View style={styles.customerInfoRow}>
                     <Text style={styles.customerLabel}>Name:</Text>
                     <Text style={styles.value}>
-                      {' '}
                       {viewOrderDetails[0]?.customer_details.name}
                     </Text>
                   </View>
                   <View style={styles.customerInfoRow}>
                     <Text style={styles.customerLabel}>Email:</Text>
                     <Text style={styles.value}>
-                      {' '}
                       {viewOrderDetails[0]?.customer_details.email}
                     </Text>
                   </View>
                   <View style={styles.customerInfoRow}>
                     <Text style={styles.customerLabel}>Phone:</Text>
                     <Text style={styles.value}>
-                      {' '}
                       {viewOrderDetails[0]?.customer_details.mobile_no}
                     </Text>
                   </View>
@@ -432,8 +459,8 @@ export default function Orders() {
       </View>
     </SafeAreaView>
   );
-}
-
+};
+export default Orders;
 const styles = StyleSheet.create({
   inputContainer: {
     display: 'flex',

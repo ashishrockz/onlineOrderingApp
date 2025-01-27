@@ -17,7 +17,7 @@ import {
   statusContainerStylesForRecentOrders,
   statusOptions,
   statusStylesForRecentOrders,
-} from './constance/constance';
+} from '../constance/constance';
 
 export default function RecentOrdersOfUsers({route}: any) {
   const [allOrders, setAllOrders] = useState([]);

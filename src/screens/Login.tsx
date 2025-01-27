@@ -14,102 +14,108 @@ import {
   Alert,
 } from 'react-native';
 import React, {useContext, useEffect, useState} from 'react';
-import { loginToken } from '../hooks/AuthuContext';
+import {loginToken} from '../hooks/AuthuContext';
 import ForgotPassword from '../components/ForgotPassword';
 const {width, height} = Dimensions.get('window');
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
+import {errorMsgs,ApiUrlConstance, methods} from '../constance/constance';
 
 const Login = () => {
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
-  const [errMsg, setErrMsg] = useState({email:"",password:""});
-  const [errors, setErrors] = useState({email:false,password:false});
-  const {setToken} = useContext(loginToken)
+  const [errMsg, setErrMsg] = useState({email: '', password: ''});
+  const [errors, setErrors] = useState({email: false, password: false});
+  const {setToken} = useContext(loginToken);
   const handelSubmit = async () => {
     try {
-      const response = await fetch(`http://10.0.12.113:3000/auth/login`, {
-        method: 'POST',
+      const response = await fetch(`${ApiUrlConstance.apiUrl}/${ApiUrlConstance.login}`, {
+        method:  methods.post,
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ username: email, password }),
+        body: JSON.stringify({username: email, password}),
       });
       if (response.ok) {
         const data = await response.json();
-        await AsyncStorage.setItem("userToken",data.data.access_token);
+        await AsyncStorage.setItem('userToken', data.data.access_token);
         setToken(true);
         // console.log(data.data.access_token);
-      } 
+      } else {
+        const responseData = await response.json();
+        switch (responseData.message) {
+          case errorMsgs.incorrect_password:
+            setError(errorMsgs.incorrect_password);
+            break;
+          case errorMsgs.incoorrect_userName:
+            setError(errorMsgs.incoorrect_userName);
+            break;
+          default:
+            setError(errorMsgs.something_went_wrong);
+            break;
+        }
+      }
     } catch (error) {
       setToken(false);
       // console.error(error);
       setError('An error occurred. Please try again.');
-      Alert.alert("Invalid Credentials please try again")
+      Alert.alert('Invalid Credentials please try again');
     }
-  };  
- 
+  };
+
   const emailValidation = (text: string) => {
     if (!text) {
-        return "Email is required";
+      return 'Email is required';
     } else if (/\s/.test(text)) {
-        return "Email must not contain spaces";
+      return 'Email must not contain spaces';
     } else if (/^\s|\s$/.test(text)) {
-        return "Email must not contain leading or tail spaces";
+      return 'Email must not contain leading or tail spaces';
+    } else if (text.length > 50) {
+      return 'Email length must not be greater than 50';
+    } else if (!text.endsWith('.com')) {
+      return 'Please enter a valid email format';
     }
-    else if (text.length > 50) {
-        return "Email length must not be greater than 50"
-    }
-    else if (!text.endsWith(".com")) {
-        return "Please enter a valid email format"
-    }
-    return "";
+    return '';
   };
- 
+
   const passwordValidation = (text: string) => {
     if (!text) {
-      return "Email is required";
-    }
-    else if (text.length < 8) {
-        return 'Password must be at least 8 characters.';
+      return 'Email is required';
+    } else if (text.length < 8) {
+      return 'Password must be at least 8 characters.';
     } else if (/\s/.test(text)) {
-        return "Password must not contain spaces";
+      return 'Password must not contain spaces';
     } else if (/^\s|\s$/.test(text)) {
-        return "Password must not contain leading or tail spaces";
+      return 'Password must not contain leading or tail spaces';
     }
-    return "";
+    return '';
   };
- 
- 
-  const validateEmail = (text:string) => {
+
+  const validateEmail = (text: string) => {
     setEmail(text);
     const msg = emailValidation(text);
-    if(msg){
-      setErrMsg({ ...errMsg, email: msg });
-      setErrors({ ...errors, email: true });
-    }
-    else{
-      setErrMsg({ ...errMsg,email:"" });
-      setErrors({ ...errors, email: false });
+    if (msg) {
+      setErrMsg({...errMsg, email: msg});
+      setErrors({...errors, email: true});
+    } else {
+      setErrMsg({...errMsg, email: ''});
+      setErrors({...errors, email: false});
     }
   };
- 
-  const validatePassword = (text:string) => {
+
+  const validatePassword = (text: string) => {
     setPassword(text);
     const msg = passwordValidation(text);
-    if(msg){
-      setErrMsg({ ...errMsg, password: msg });
-      setErrors({ ...errors, password: true });
-    }
-    else{
-      setErrMsg({ ...errMsg,password:"" });
-      setErrors({ ...errors, password: false });
+    if (msg) {
+      setErrMsg({...errMsg, password: msg});
+      setErrors({...errors, password: true});
+    } else {
+      setErrMsg({...errMsg, password: ''});
+      setErrors({...errors, password: false});
     }
   };
- 
- 
+
   return (
     <KeyboardAvoidingView
       style={{flex: 1}}
@@ -124,20 +130,26 @@ const Login = () => {
             <View style={styles.inputGroup}>
               <Text style={styles.label}>Email</Text>
               <TextInput
-                style={[styles.textInput,errors.email && {borderColor:"red"}]}
+                style={[styles.textInput, errors.email && {borderColor: 'red'}]}
                 keyboardType="email-address"
                 placeholder="Enter your email"
                 onChangeText={text => {
                   validateEmail(text);
                 }}
               />
-              {errors.email && <Text style={{color:"red",fontSize:18}}>{errMsg.email}</Text>}
+              {errors.email && (
+                <Text style={{color: 'red', fontSize: 18}}>{errMsg.email}</Text>
+              )}
             </View>
             <View style={styles.inputGroup}>
               <Text style={styles.label}>Password</Text>
-              <View style={[styles.passwordContainer, errors.password && {borderColor:"red"}]}>
+              <View
+                style={[
+                  styles.passwordContainer,
+                  errors.password && {borderColor: 'red'},
+                ]}>
                 <TextInput
-                  style={styles.passwordInput }
+                  style={styles.passwordInput}
                   secureTextEntry={!passwordVisible}
                   placeholder="Enter your password"
                   autoCapitalize="none"
@@ -157,13 +169,18 @@ const Login = () => {
                   />
                 </TouchableOpacity>
               </View>
-              {errors.password && <Text style={{color:"red",fontSize:18}}>{errMsg.password}</Text>}
+              {errors.password && (
+                <Text style={{color: 'red', fontSize: 18}}>
+                  {errMsg.password}
+                </Text>
+              )}
             </View>
             <ForgotPassword />
             <TouchableOpacity
               style={[
                 styles.loginButton,
-                (!email || !password || errors.email || errors.password) && styles.notActiveLoginButton,
+                (!email || !password || errors.email || errors.password) &&
+                  styles.notActiveLoginButton,
               ]}
               onPress={handelSubmit}
               disabled={!email || !password || errors.email || errors.password}>
@@ -175,9 +192,9 @@ const Login = () => {
     </KeyboardAvoidingView>
   );
 };
- 
+
 export default Login;
- 
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -265,7 +282,7 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     alignItems: 'center',
   },
-  notActiveLoginButton:{
+  notActiveLoginButton: {
     backgroundColor: 'grey',
     paddingVertical: 15,
     borderRadius: 15,

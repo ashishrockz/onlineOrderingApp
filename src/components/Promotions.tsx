@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   SafeAreaView,
   StyleSheet,
@@ -10,36 +10,21 @@ import {
   FlatList,
   Image,
 } from 'react-native';
-
-const userData = [
-  {
-    name: 'Aanya Sharma',
-    phone: '(912) 345-6789',
-    email: 'Aanyasharma@yopmail.com',
-    code: 'TMWM431',
-    discount: '5.00',
-    registeredOn: 'undefined NaNth 12:NaNam',
-    redeemStatus: 'No',
-  },
-  {
-    name: 'Aarav Singh',
-    phone: '(987) 654-3210',
-    email: 'Aaravsingh@yopmail.com',
-    code: 'TMWM862',
-    discount: '10.00',
-    registeredOn: 'undefined NaNth 12:NaNam',
-    redeemStatus: 'No',
-  },
-];
-
+import { PromotionsData } from '../types/type';
+import { ApiUrlConstance, errorMsgs, methods } from '../constance/constance';
+ 
+ 
 const Promotions = () => {
   const [inputFilter, setInputFilter] = useState<string>('');
+  const [filteredData, setFilteredData] = useState([]);
+  const [data, setData] = useState([]);
   const [error, setError] = useState('');
-  const getPromotionsDetails = async () => {
+ 
+   const getPromotionsDetails = async () => {
     try {
       const token = AsyncStorage.getItem('userToken');
-      const response = await fetch('http://10.0.12.113:3000/promotion/users', {
-        method: 'GET',
+      const response = await fetch(`${ApiUrlConstance.apiUrl}/${ApiUrlConstance.promotion}`, {
+        method: methods.get,
         headers: {
           Authorization: `Bearer ${token}`,
           outlet: '69',
@@ -48,36 +33,82 @@ const Promotions = () => {
       if (response.ok) {
         setError('');
         const data = await response.json();
+        console.log(data);
+        
         return data.data;
       } else {
-        setError('Something went wrong... Please try again');
+        const responseData = await response.json();
+        switch (responseData.msg) {
+          case errorMsgs.unauthorized_access:
+            setError(errorMsgs.unauthorized_access);
+            break;
+          case errorMsgs.promotion_details_not_found:
+            setError(errorMsgs.promotion_details_not_found);
+            break;
+          case errorMsgs.something_went_wrong:
+            setError(errorMsgs.something_went_wrong);
+            break;
+          default:
+            setError(errorMsgs.something_went_wrong);
+            break;
+        }
       }
     } catch (error) {
       setError('Something went wrong... Please try again');
       console.error('Error fetching Promotions details:', error);
     }
-  };
-  useEffect( () =>{
-    getPromotionsDetails()
-  })
-  const filteredData = userData.filter(user =>
-    user.name.toLowerCase().includes(inputFilter.toLowerCase()),
-  );
-
-  const renderCard = ({item}: {item: any}) => (
+  };    
+ 
+  useEffect(() => {
+    getPromotionsDetails();
+  }, []);
+ 
+  useEffect(() => {
+    const filteredDataOfUser = data.filter((user: PromotionsData) => {
+      const searchString = inputFilter.toLowerCase();
+      return (
+        user.name.toLowerCase().includes(searchString) ||
+        user.phone_number.toLowerCase().includes(searchString) ||
+        user.email.toLowerCase().includes(searchString) ||
+        user.discount_code.toLowerCase().includes(searchString)
+      );
+    });
+    setFilteredData(filteredDataOfUser);
+  }, [inputFilter, data]);
+ 
+  const renderCard = ({ item }: { item: PromotionsData }) => (
     <View style={styles.card}>
-      <Text style={styles.cardTitle}>{item.name}</Text>
-      <Text style={styles.cardDetail}>Phone: {item.phone}</Text>
-      <Text style={styles.cardDetail}>Email: {item.email}</Text>
-      <Text style={styles.cardDetail}>Code: {item.code}</Text>
-      <Text style={styles.cardDetail}>Discount: {item.discount}%</Text>
-      <Text style={styles.cardDetail}>Registered On: {item.registeredOn}</Text>
-      <Text style={styles.cardDetail}>Redeem Status: {item.redeemStatus}</Text>
+      <View style={styles.cardDetailsContainer}>
+        <Text style={styles.cardHeading}>Name:</Text>
+        <Text style={styles.cardDetail}>{item.name}</Text>
+      </View>
+      <View style={styles.cardDetailsContainer}>
+        <Text style={styles.cardHeading}>Phone:</Text>
+        <Text style={styles.cardDetail}>{item.phone_number}</Text>
+      </View>
+      <View style={styles.cardDetailsContainer}>
+        <Text style={styles.cardHeading}>Email:</Text>
+        <Text style={styles.cardDetail}>{item.email}</Text>
+      </View>
+      <View style={styles.cardDetailsContainer}>
+        <Text style={styles.cardHeading}>Code:</Text>
+        <Text style={styles.cardDetail}>{item.discount_code}</Text>
+      </View>
+      <View style={styles.cardDetailsContainer}>
+        <Text style={styles.cardHeading}>Discount:</Text>
+        <Text style={styles.cardDetail}>{item.discount_percentage}%</Text>
+      </View>
+      <View style={styles.cardDetailsContainer}>
+        <Text style={styles.cardHeading}>Registered On:</Text>
+        <Text style={styles.cardDetail}>{
+          (new Date(item.start_date)).toLocaleDateString()
+        }</Text>
+      </View>
     </View>
   );
-
+ 
   return (
-    <SafeAreaView style={{flex: 1, backgroundColor: '#f1f1f1', margin: 10}}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#f1f1f1', margin: 10 }}>
       <View style={styles.SearchHeader}>
         <View style={styles.inputContainer}>
           <TextInput
@@ -107,7 +138,7 @@ const Promotions = () => {
           )}
         </View>
         <Text style={styles.registrationText}>
-          Total Registrations: {userData.length}
+          Total Registrations: {data.length}
         </Text>
       </View>
       <FlatList
@@ -119,9 +150,11 @@ const Promotions = () => {
     </SafeAreaView>
   );
 };
-
+ 
 export default Promotions;
-
+ 
+ 
+ 
 const styles = StyleSheet.create({
   SearchHeader: {
     flexDirection: 'row',
@@ -178,8 +211,18 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   cardDetail: {
-    fontSize: 14,
+    fontSize: 15,
     color: '#333',
     marginBottom: 3,
   },
+  cardDetailsContainer: {
+    flexDirection: 'row',
+    marginBottom: 5,
+  },
+  cardHeading: {
+    fontWeight: 'bold',
+    marginRight: 5,
+    fontSize:16
+  }
 });
+ 

@@ -1,0 +1,7 @@
+first we need to install all the packages 
+npm install
+-> later before starting the app clean the gralew 
+--> cd android
+-->gradlew clean 
+->Now we can start the app
+--> npm start
