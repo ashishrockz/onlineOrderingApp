@@ -77,7 +77,7 @@ const Promotions = () => {
     });
     setFilteredData(filteredDataOfUser);
   }, [inputFilter, promotionData]);
- 
+
   const renderCard = ({ item }: { item: PromotionsData }) => (
     <View style={styles.card}>
       <View style={styles.cardDetailsContainer}>
@@ -102,13 +102,22 @@ const Promotions = () => {
       </View>
       <View style={styles.cardDetailsContainer}>
         <Text style={styles.cardHeading}>Registered On:</Text>
-        <Text style={styles.cardDetail}>{
-          (new Date(item.start_date)).toLocaleDateString()
-        }</Text>
+        <Text style={styles.cardDetail}>
+          {new Date(item.start_date).toLocaleDateString()}
+        </Text>
       </View>
     </View>
   );
- 
+
+  const EmptyListMessage = () => (
+    <View style={styles.emptyListContainer}>
+      <Text style={styles.noDataText}>No users found</Text>
+      <Text style={styles.noDataSubText}>
+        Try adjusting your search to find what you're looking for
+      </Text>
+    </View>
+  );
+
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#f1f1f1', margin: 10 }}>
       <View style={styles.SearchHeader}>
@@ -147,12 +156,16 @@ const Promotions = () => {
         data={filteredData}
         keyExtractor={(_item, index) => index.toString()}
         renderItem={renderCard}
-        contentContainerStyle={styles.cardContainer}
+        contentContainerStyle={[
+          styles.cardContainer,
+          filteredData.length === 0 && styles.emptyListContentContainer,
+        ]}
+        ListEmptyComponent={EmptyListMessage}
       />
     </SafeAreaView>
   );
 };
- 
+
 export default Promotions;
  
  
@@ -225,6 +238,27 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginRight: 5,
     fontSize:16
-  }
+  },
+  emptyListContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  emptyListContentContainer: {
+    flexGrow: 1,
+  },
+  noDataText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#666',
+    marginBottom: 8,
+  },
+  noDataSubText: {
+    fontSize: 14,
+    color: '#999',
+    textAlign: 'center',
+  },
+ 
 });
  

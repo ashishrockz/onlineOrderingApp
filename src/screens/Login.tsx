@@ -18,7 +18,7 @@ import {loginToken} from '../hooks/AuthuContext';
 import ForgotPassword from '../components/ForgotPassword';
 const {width, height} = Dimensions.get('window');
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {errorMessage,ApiUrlConstance, methods} from '../constance/constance';
+import {errorMessage, ApiUrlConstance, methods} from '../constance/constance';
 
 const Login = () => {
   const [passwordVisible, setPasswordVisible] = useState(false);
@@ -28,82 +28,118 @@ const Login = () => {
   const [errMsg, setErrMsg] = useState({email: '', password: ''});
   const [errors, setErrors] = useState({email: false, password: false});
   const {setToken} = useContext(loginToken);
+
   const handelSubmit = async () => {
     try {
-      const response = await fetch(`${ApiUrlConstance?.apiUrl}/${ApiUrlConstance?.login}`, {
-        method:  methods?.post,
-        headers: {
-          'Content-Type': 'application/json',
+      const response = await fetch(
+        `${ApiUrlConstance?.apiUrl}/${ApiUrlConstance?.login}`,
+        {
+          method: methods?.post,
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({username: email, password}),
         },
-        body: JSON.stringify({username: email, password}),
-      });
+      );
       if (response.ok) {
         const responceData = await response.json();
-        await AsyncStorage.setItem('userToken', responceData?.data.access_token);
-        setToken(true);
-        // console.log(data.data.access_token);
+        if (responceData?.data?.access_token) {
+          await AsyncStorage.setItem(
+            'userToken',
+            responceData.data.access_token,
+          );
+          setToken(true);
+        } else {
+          setError('Invalid response from server');
+        }
       } else {
         const responseData = await response.json();
-        switch (responseData?.message) {
+        setErrors({email: false, password: false});
+        setErrMsg({email: '', password: ''});
+        console.log(responseData);
+        
+        switch (responseData?.code) {
           case errorMessage?.incorrect_password:
-            setError(errorMessage?.incorrect_password);
+            setErrors(prev => ({...prev, password: true})); 
+            setErrMsg(prev => ({
+              ...prev,
+              password:
+                errorMessage?.incorrect_password || 'Incorrect password',
+            }));
             break;
-          case errorMessage?.incoorrect_userName:
-            setError(errorMessage?.incoorrect_userName);
+          case errorMessage?.incoorrect_mail:
+            setErrors(prev => ({...prev, email: true}));
+            setErrMsg(prev => ({
+              ...prev,
+              email: errorMessage?.incoorrect_mail || 'Incorrect email',
+            }));
             break;
           default:
-            setError(errorMessage?.something_went_wrong);
+            setError(errorMessage?.something_went_wrong || 'An error occurred');
             break;
         }
       }
     } catch (error) {
       setToken(false);
-      // console.error(error);
       setError('An error occurred. Please try again.');
       Alert.alert('Invalid Credentials please try again');
     }
   };
 
-  const emailValidation = (text: string) => {
+  const emailValidation = (text: string | null): string => {
     if (!text) {
       return 'Email is required';
+    }
+
+    const trimmedText = text.trim();
+
+    if (trimmedText.length === 0) {
+      return 'Email is required';
+    } else if (text !== trimmedText) {
+      return 'Email must not contain leading or trailing spaces';
     } else if (/\s/.test(text)) {
       return 'Email must not contain spaces';
-    } else if (/^\s|\s$/.test(text)) {
-      return 'Email must not contain leading or tail spaces';
     } else if (text.length > 50) {
       return 'Email length must not be greater than 50';
-    } else if (!text.endsWith('.com')) {
+    } else if (!text.toLowerCase().endsWith('.com')) {
       return 'Please enter a valid email format';
     }
     return '';
   };
 
-  const passwordValidation = (text: string) => {
+  const passwordValidation = (text: string | null): string => {
     if (!text) {
-      return 'passwors is required';
-    } else if (text.length < 8) {
-      return 'Password must be at least 8 characters.';
+      return 'Password is required';
+    }
+
+    const trimmedText = text.trim();
+
+    if (trimmedText.length === 0) {
+      return 'Password is required';
+    } else if (text !== trimmedText) {
+      return 'Password must not contain leading or trailing spaces';
     } else if (/\s/.test(text)) {
       return 'Password must not contain spaces';
-    } else if (/^\s|\s$/.test(text)) {
-      return 'Password must not contain leading or tail spaces';
+    } else if (text.length < 8) {
+      return 'Password must be at least 8 characters.';
     }
     return '';
   };
 
   const validateEmail = (text: string) => {
-    setEmail(text);
-    const msg = emailValidation(text);
-    setErrMsg({...errMsg, email: msg || ''});
-    setErrors({...errors, email: !!msg});
-};
+    const safeText = text || '';
+    setEmail(safeText);
+    const msg = emailValidation(safeText);
+    setErrMsg(prev => ({...prev, email: msg}));
+    setErrors(prev => ({...prev, email: !!msg}));
+  };
 
   const validatePassword = (text: string) => {
-    setPassword(text);
-    const msg = passwordValidation(text);
-    setErrMsg({...errMsg, password: msg || ''});
-    setErrors({...errors, password: !!msg});
+    const safeText = text || '';
+    setPassword(safeText);
+    const msg = passwordValidation(safeText);
+    setErrMsg(prev => ({...prev, password: msg}));
+    setErrors(prev => ({...prev, password: !!msg}));
   };
 
   return (
@@ -123,12 +159,11 @@ const Login = () => {
                 style={[styles.textInput, errors.email && {borderColor: 'red'}]}
                 keyboardType="email-address"
                 placeholder="Enter your email"
-                onChangeText={text => {
-                  validateEmail(text);
-                }}
+                value={email}
+                onChangeText={validateEmail}
               />
               {errors.email && (
-                <Text style={{color: 'red', fontSize: 18}}>{errMsg.email}</Text>
+                <Text style={styles.errorText}>{errMsg.email}</Text>
               )}
             </View>
             <View style={styles.inputGroup}>
@@ -143,9 +178,8 @@ const Login = () => {
                   secureTextEntry={!passwordVisible}
                   placeholder="Enter your password"
                   autoCapitalize="none"
-                  onChangeText={text => {
-                    validatePassword(text);
-                  }}
+                  value={password}
+                  onChangeText={validatePassword}
                 />
                 <TouchableOpacity
                   onPress={() => setPasswordVisible(!passwordVisible)}>
@@ -160,12 +194,11 @@ const Login = () => {
                 </TouchableOpacity>
               </View>
               {errors.password && (
-                <Text style={{color: 'red', fontSize: 18}}>
-                  {errMsg.password}
-                </Text>
+                <Text style={styles.errorText}>{errMsg.password}</Text>
               )}
             </View>
             <ForgotPassword />
+            {error && <Text style={styles.errorText}>{error}</Text>}
             <TouchableOpacity
               style={[
                 styles.loginButton,
@@ -282,5 +315,10 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '700',
     color: '#fff',
+  },
+  errorText: {
+    color: 'red',
+    fontSize: 17,
+    alignItems:'center'
   },
 });

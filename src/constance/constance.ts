@@ -223,6 +223,6 @@ export const errorMessage: { [key: string]: string } = {
   something_went_wrong: 'Server error. Please try again later.',
   promotion_details_not_found: 'Promotion details not found.',
   incorrect_password:"Username and Password miss match",
-  incorrect_userName:"Username and Password miss match",
+  incorrect_mail:"Username and Password miss match",
   catch_error:'Something went wrong... Please try again',
 };
