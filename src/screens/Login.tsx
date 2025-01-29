@@ -156,7 +156,7 @@ const Login = () => {
           <View style={styles.loginContainer}>
             <Text style={styles.loginTitle}>Login</Text>
             <View style={styles.inputGroup}>
-              <Text style={styles.label}>Email</Text>
+              <Text style={styles.label}>Email *</Text>
               <TextInput
                 style={[styles.textInput, errors.email && {borderColor: 'red'}]}
                 keyboardType="email-address"
@@ -172,7 +172,7 @@ const Login = () => {
             </View>
             
             <View style={styles.inputGroup}>
-              <Text style={styles.label}>Password</Text>
+              <Text style={styles.label}>Password *</Text>
               <View
                 style={[
                   styles.passwordContainer,

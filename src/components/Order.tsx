@@ -57,7 +57,7 @@ const Orders = () => {
         {
           method:  methods?.get,
           headers: {
-            Authorization: `${ApiUrlConstance?.bearer} ${ApiUrlConstance?.webToken}`,
+            Authorization: `${ApiUrlConstance?.bearer} eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7Il9pZCI6MX0sImlhdCI6MTczODEyNTg4Mn0.CPD_pjsl__yHgZBNNAoEG6xMhQyb6cSZ41LQHyLH9s8`,
             outlet: ApiUrlConstance?.secondOutlet,
           },
         },
@@ -155,7 +155,7 @@ const Orders = () => {
       const response = await fetch(url, {
         method:  methods?.get,
         headers: {
-          Authorization: `${ApiUrlConstance?.bearer} ${ApiUrlConstance?.webToken}`,
+          Authorization: `${ApiUrlConstance?.bearer} eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7Il9pZCI6MX0sImlhdCI6MTczODEyNTg4Mn0.CPD_pjsl__yHgZBNNAoEG6xMhQyb6cSZ41LQHyLH9s8`,
           outlet: ApiUrlConstance?.secondOutlet,
         },
       });

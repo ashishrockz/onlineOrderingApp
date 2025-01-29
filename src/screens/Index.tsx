@@ -1,77 +1,75 @@
-import { SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import React, { useState } from 'react';
-import FooterIndex from '../components/FooterIndex';
-import Orders from '../components/Order';
-import Header from '../components/Header';
-import Promotions from '../components/Promotions';
- 
+import React, { useState } from "react";
+import { SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import Header from "../components/Header";
+import Orders from "../components/Order";
+import Promotions from "../components/Promotions";
+
 const Index = () => {
-  const [currentComponent, setCurrentComponent] = useState("orders");
- 
-  const handleLogoPress = () => {
-    setCurrentComponent("orders");
-  };
+  const [currentTab, setCurrentTab] = useState("orders");
 
   return (
     <SafeAreaView style={styles.container}>
-      <Header onLogoPress={handleLogoPress} />
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity 
-          onPress={() => setCurrentComponent("orders")} 
-          style={[styles.button, currentComponent === "orders" && styles.activeButton]}
+      <Header onLogoPress={() => setCurrentTab("orders")} />
+      <View style={styles.tabContainer}>
+        <TouchableOpacity
+          style={[styles.tabButton, currentTab === "orders" && styles.activeTab]}
+          onPress={() => setCurrentTab("orders")}
         >
-          <Text style={[styles.buttonText, currentComponent === "orders" && styles.activeButtonText]}>
+          <Text style={[styles.tabText, currentTab === "orders" && styles.activeTabText]}>
             Orders
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
-          onPress={() => setCurrentComponent("promotions")} 
-          style={[styles.button, currentComponent === "promotions" && styles.activeButton]}
+          style={[styles.tabButton, currentTab === "promotions" && styles.activeTab]}
+          onPress={() => setCurrentTab("promotions")}
         >
-          <Text style={[styles.buttonText, currentComponent === "promotions" && styles.activeButtonText]}>
+          <Text style={[styles.tabText, currentTab === "promotions" && styles.activeTabText]}>
             Promotions
           </Text>
         </TouchableOpacity>
       </View>
-      {currentComponent === "orders" ? <Orders /> : <Promotions/>}
+      <View style={styles.contentContainer}>
+        {currentTab === "orders" ? <Orders /> : <Promotions />}
+      </View>
     </SafeAreaView>
   );
 };
- 
+
 export default Index;
- 
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'space-between',
+    backgroundColor: "#fff",
   },
-  buttonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
+  tabContainer: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    backgroundColor: "#f1f1f1",
     paddingVertical: 10,
-    backgroundColor: '#f1f1f1',
-    borderBottomWidth:1,
-    borderColor:'#ddd'
+    borderBottomWidth: 2,
+    borderBottomColor: "#ddd",
   },
-  button: {
-    backgroundColor: 'white',
-    borderColor: 'white',
-    borderWidth: 2,
-    height: 50,
-    width: 100,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderRadius: 10,
+  tabButton: {
+    flex: 1,
+    alignItems: "center",
+    paddingVertical: 10,
+    borderBottomWidth: 3,
+    borderBottomColor: "transparent",
   },
-  activeButton: {
-    borderColor: 'orange',
+  activeTab: {
+    borderBottomColor: "orange",
   },
-  buttonText: {
-    color: 'black',
-    fontWeight: '600',
+  tabText: {
     fontSize: 16,
+    color: "#555",
+    fontWeight: "600",
   },
-  activeButtonText: {
-    color: 'orange',
+  activeTabText: {
+    color: "orange",
+  },
+  contentContainer: {
+    flex: 1,
+    padding: 10,
   },
 });
