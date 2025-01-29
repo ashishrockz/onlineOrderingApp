@@ -15,7 +15,7 @@ const Header = ({onLogoPress}:any) => {
       <View style={{flexDirection:'row',justifyContent:'space-between',alignItems:'center'}}>
       <ChefgaLogo onPress={onLogoPress} />
       <TouchableOpacity onPress={()=> logout()}>
-          <Image source={require('../assets/logout.png')} style={{marginRight:8}}/>
+          <Image source={require('../assets/logout.png')} style={styles.logoutImage}/>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -39,4 +39,8 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
   },
+  logoutImage:{
+    marginRight:8,
+    tintColor:"orange"
+  }
 });

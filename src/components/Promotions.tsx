@@ -263,6 +263,8 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     color: '#333',
+    width:"70%",
+    flexWrap:"wrap"
   },
   discountBadge: {
     backgroundColor: '#e8f5e9',
@@ -289,22 +291,24 @@ const styles = StyleSheet.create({
   },
   infoRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     marginBottom: 12,
   },
   infoItem: {
     flexDirection: 'row',
     alignItems: 'center',
+    marginRight:10,
+    flexWrap:"wrap"
   },
   infoIcon: {
     width: 16,
     height: 16,
-    tintColor: '#666',
     marginRight: 8,
+    tintColor:'blue'
   },
   infoText: {
     fontSize: 14,
     color: '#333',
+    flexWrap:"wrap"
   },
   dateContainer: {
     flexDirection: 'row',

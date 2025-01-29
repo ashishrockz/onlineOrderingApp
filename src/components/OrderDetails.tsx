@@ -1,4 +1,4 @@
-import { SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Image, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { ApiUrlConstance, errorMessage, methods, STATUS_MAP, statusContainerStyles, statusStyles } from "../constance/constance";
 import { useEffect, useState } from "react";
 import { twelveHoursFormat } from "../hooks/helpers";
@@ -13,7 +13,7 @@ export default function OrderDetails({ route }: any) {
       const response = await fetch(url, {
         method: methods?.get,
         headers: {
-          Authorization: `${ApiUrlConstance?.bearer} eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7Il9pZCI6MX0sImlhdCI6MTczODEyNTg4Mn0.CPD_pjsl__yHgZBNNAoEG6xMhQyb6cSZ41LQHyLH9s8`,
+          Authorization: `${ApiUrlConstance?.bearer} eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7Il9pZCI6MX0sImlhdCI6MTczODE0NDQ1OH0.x4QjysICjH7u4oMsyFfq0qGZNkcvZfwx-CRyhm2cpEQ`,
           outlet: ApiUrlConstance?.secondOutlet,
         },
       });
@@ -118,7 +118,12 @@ export default function OrderDetails({ route }: any) {
           <View style={styles.card}>
             <View style={styles.customerInfo}>
               <Text style={styles.customerName}>{orderData?.customer_details?.name}</Text>
-              <Text style={styles.customerDetail}>{orderData?.customer_details?.email}</Text>
+              <View style={{flexDirection:"row",alignItems:"center"}}>
+                        <Image source={{
+                            uri:"https://img.icons8.com/ios/50/mail.png"
+                          }} style={styles.iconsImage}></Image>
+                          <Text style={styles.customerDetail}>{orderData?.customer_details?.email}</Text>
+                       </View>
               <Text style={styles.customerDetail}>{orderData?.customer_details?.mobile_no}</Text>
             </View>
           </View>
@@ -135,6 +140,12 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     flex: 1,
+  },
+  iconsImage:{
+    height:18,
+    width:18,
+    marginRight:8,
+    tintColor:'blue'
   },
   header: {
     flexDirection: 'row',
