@@ -8,23 +8,32 @@ import Promotions from '../components/Promotions';
 const Index = () => {
   const [currentComponent, setCurrentComponent] = useState("orders");
  
+  const handleLogoPress = () => {
+    setCurrentComponent("orders");
+  };
+
   return (
     <SafeAreaView style={styles.container}>
-      <Header />
+      <Header onLogoPress={handleLogoPress} />
       <View style={styles.buttonContainer}>
-        <TouchableOpacity onPress={() => setCurrentComponent("orders")} style={[styles.button,currentComponent === "orders" && styles.activeButton,]}>
-          <Text style={[styles.buttonText,currentComponent === "orders" && styles.activeButtonText,]}>
+        <TouchableOpacity 
+          onPress={() => setCurrentComponent("orders")} 
+          style={[styles.button, currentComponent === "orders" && styles.activeButton]}
+        >
+          <Text style={[styles.buttonText, currentComponent === "orders" && styles.activeButtonText]}>
             Orders
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
-          onPress={() => setCurrentComponent("promotions")} style={[styles.button,currentComponent === "promotions" && styles.activeButton,]}>
-          <Text style={[styles.buttonText,currentComponent === "promotions" && styles.activeButtonText,]}>
+          onPress={() => setCurrentComponent("promotions")} 
+          style={[styles.button, currentComponent === "promotions" && styles.activeButton]}
+        >
+          <Text style={[styles.buttonText, currentComponent === "promotions" && styles.activeButtonText]}>
             Promotions
           </Text>
         </TouchableOpacity>
       </View>
-      {currentComponent == "orders" ?<Orders />:<Promotions/>}
+      {currentComponent === "orders" ? <Orders /> : <Promotions/>}
     </SafeAreaView>
   );
 };

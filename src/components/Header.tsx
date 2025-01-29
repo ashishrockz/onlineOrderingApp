@@ -4,7 +4,7 @@ import ChefgaLogo from './assets/ChefgaLogo';
 import { loginToken } from '../hooks/AuthuContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
  
-const Header = () => {
+const Header = ({onLogoPress}:any) => {
   const logout = async () =>{
     await AsyncStorage.removeItem('userToken');
     setToken(false)
@@ -13,8 +13,8 @@ const Header = () => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={{flexDirection:'row',justifyContent:'space-between',alignItems:'center'}}>
-        <ChefgaLogo />
-        <TouchableOpacity onPress={()=> logout()}>
+      <ChefgaLogo onPress={onLogoPress} />
+      <TouchableOpacity onPress={()=> logout()}>
           <Image source={require('../assets/logout.png')} style={{marginRight:8}}/>
         </TouchableOpacity>
       </View>

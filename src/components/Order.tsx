@@ -691,7 +691,7 @@ const styles = StyleSheet.create({
   searchHeader: {
     flexDirection: 'row',
     marginBottom: 18,
-    alignItems: 'center',
+    alignItems: 'flex-end',
   },
   searchCancelImg: {marginLeft: 18, height: 14, width: 14},
   searchIconImg: {height: 25, width: 25},

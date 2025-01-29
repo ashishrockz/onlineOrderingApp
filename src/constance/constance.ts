@@ -222,7 +222,12 @@ export const errorMessage: { [key: string]: string } = {
   unauthorized_access: 'Unauthorized access. Please log in again.',
   something_went_wrong: 'Server error. Please try again later.',
   promotion_details_not_found: 'Promotion details not found.',
-  incorrect_password:"Username and Password miss match",
+  incorrect_password:"Incorrect Password",
   incorrect_mail:"Username and Password miss match",
   catch_error:'Something went wrong... Please try again',
 };
+export const errorMessageConstants :{ [key: string]: string } = {
+  incorrect_password:"incorrect_password",
+  incorrect_mail:"incorrect_mail"
+ 
+}

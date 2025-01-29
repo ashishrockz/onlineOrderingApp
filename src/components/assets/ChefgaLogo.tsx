@@ -1,11 +1,12 @@
-import {Image, StyleSheet, Text, View} from 'react-native';
-import React from 'react';
+import {Image, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import React, { useState } from 'react';
 
-const ChefgaLogo = () => {
+const ChefgaLogo = ({onPress}:any) => {
+  
   return (
-    <View>
+    <TouchableOpacity onPress={onPress}>
       <Image style={styles.logo} source={require('../../assets/logo.png')} />
-    </View>
+    </TouchableOpacity>
   );
 };
 

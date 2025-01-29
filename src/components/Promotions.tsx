@@ -35,7 +35,7 @@ const Promotions = () => {
         const responceData = await response.json();
         setPromotionData(responceData);
         setFilteredData(responceData);
-        // console.log(data);
+        console.log(responceData);
         
         return responceData?.data;
       } else {
@@ -149,7 +149,7 @@ const Promotions = () => {
           )}
         </View>
         <Text style={styles.registrationText}>
-          Total Registrations: {promotionData?.length}
+          Total Registrations: {filteredData?.length}
         </Text>
       </View>
       <FlatList

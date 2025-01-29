@@ -18,7 +18,7 @@ import {loginToken} from '../hooks/AuthuContext';
 import ForgotPassword from '../components/ForgotPassword';
 const {width, height} = Dimensions.get('window');
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {errorMessage, ApiUrlConstance, methods} from '../constance/constance';
+import {errorMessage, ApiUrlConstance, methods, errorMessageConstants} from '../constance/constance';
 
 const Login = () => {
   const [passwordVisible, setPasswordVisible] = useState(false);
@@ -56,18 +56,18 @@ const Login = () => {
         const responseData = await response.json();
         setErrors({email: false, password: false});
         setErrMsg({email: '', password: ''});
-        console.log(responseData);
-        
+        console.log(responseData.code);
+       
         switch (responseData?.code) {
-          case errorMessage?.incorrect_password:
-            setErrors(prev => ({...prev, password: true})); 
+          case errorMessageConstants?.incorrect_password:
+            setErrors(prev => ({...prev, password: true}));
             setErrMsg(prev => ({
               ...prev,
               password:
                 errorMessage?.incorrect_password || 'Incorrect password',
             }));
             break;
-          case errorMessage?.incoorrect_mail:
+          case errorMessageConstants?.incoorrect_mail:
             setErrors(prev => ({...prev, email: true}));
             setErrMsg(prev => ({
               ...prev,
@@ -81,10 +81,12 @@ const Login = () => {
       }
     } catch (error) {
       setToken(false);
-      setError('An error occurred. Please try again.');
+      setError('Invalid Credentials please try again');
       Alert.alert('Invalid Credentials please try again');
     }
   };
+ 
+ 
 
   const emailValidation = (text: string | null): string => {
     if (!text) {
@@ -162,10 +164,13 @@ const Login = () => {
                 value={email}
                 onChangeText={validateEmail}
               />
+              <View style ={{paddingTop:4}}>
               {errors.email && (
                 <Text style={styles.errorText}>{errMsg.email}</Text>
               )}
             </View>
+            </View>
+            
             <View style={styles.inputGroup}>
               <Text style={styles.label}>Password</Text>
               <View
@@ -198,7 +203,7 @@ const Login = () => {
               )}
             </View>
             <ForgotPassword />
-            {error && <Text style={styles.errorText}>{error}</Text>}
+            {error && <Text style={[styles.errorText,{textAlign:'center',marginBottom:10}]}>{error}</Text>}
             <TouchableOpacity
               style={[
                 styles.loginButton,
@@ -235,27 +240,27 @@ const styles = StyleSheet.create({
     resizeMode: 'contain',
   },
   loginContainer: {
-    backgroundColor: '#fff',
-    padding: 20,
-    borderRadius: 15,
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
-    shadowOpacity: 0.2,
-    shadowRadius: 5,
-    elevation: 3,
+    // backgroundColor: '#fff',
+    // padding: 20,
+    // borderRadius: 15,
+    // shadowColor: '#000',
+    // shadowOffset: {width: 0, height: 2},
+    // shadowOpacity: 0.2,
+    // shadowRadius: 5,
+    // elevation: 3,
   },
   loginTitle: {
     fontSize: 26,
     fontWeight: 'bold',
     textAlign: 'center',
     marginBottom: 20,
-    color: '#333',
+    color: '#3b3b3b',
   },
   inputGroup: {
     marginBottom: 20,
   },
   label: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: '500',
     color: '#444',
     marginBottom: 8,
@@ -263,10 +268,10 @@ const styles = StyleSheet.create({
   textInput: {
     borderWidth: 1,
     borderColor: '#ddd',
-    borderRadius: 15,
+    borderRadius: 6,
     padding: 20,
-    fontSize: 16,
-    backgroundColor: '#f9f9f9',
+    fontSize: 18,
+    backgroundColor: '#f5f5f5',
     color: '#333',
   },
   passwordContainer: {
@@ -274,14 +279,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 1,
     borderColor: '#ddd',
-    borderRadius: 15,
-    backgroundColor: '#f9f9f9',
+    borderRadius: 6,
+    backgroundColor: '#f5f5f5',
     paddingHorizontal: 12,
     paddingVertical: 10,
   },
   passwordInput: {
     flex: 1,
-    fontSize: 16,
+    fontSize: 18,
     color: '#333',
     marginRight: 10,
   },
@@ -300,7 +305,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   loginButton: {
-    backgroundColor: '#0054a5',
+    backgroundColor: '#ff5733',
     paddingVertical: 15,
     borderRadius: 15,
     alignItems: 'center',
@@ -318,7 +323,7 @@ const styles = StyleSheet.create({
   },
   errorText: {
     color: 'red',
-    fontSize: 17,
-    alignItems:'center'
+    fontSize: 16,
+    alignItems: 'center',
   },
 });
