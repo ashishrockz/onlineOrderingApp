@@ -11,9 +11,8 @@ import {
   ActivityIndicator,
   Image,
   TouchableOpacity,
-  Alert,
-  Modal,
-  Button,
+  RefreshControl,
+  Platform,
 } from 'react-native';
 import {Dropdown} from 'react-native-element-dropdown';
 import {orderType} from '../types/type';
@@ -29,31 +28,31 @@ import {
 } from '../constance/constance';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {useNavigation} from '@react-navigation/native';
-import { twelveHoursFormat,formatDate } from '../hooks/helpers';
+import {twelveHoursFormat, formatDate} from '../hooks/helpers';
+
 type RootStackParamList = {
   RecentOrdersOfUsers: {name: string};
+  viewOrder: {id: number};
 };
 
-type NavigationProp = NativeStackNavigationProp<
-  RootStackParamList,
-  'RecentOrdersOfUsers'
->;
+type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'RecentOrdersOfUsers'>;
+
 const Orders = () => {
   const navigation = useNavigation<NavigationProp>();
   const [inputFilter, setInputFilter] = useState<string>('');
   const [orderList, setOrderList] = useState<orderType[]>([]);
   const [filteredOrders, setFilteredOrders] = useState<orderType[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<string>(statusmode?.all);
-  const [isFiltering, setIsFiltering] = useState(false);
 
   const getOrderDetails = async () => {
     try {
       const response = await fetch(
         `${ApiUrlConstance?.chefgaApiUrl}/${ApiUrlConstance?.order}`,
         {
-          method:  methods?.get,
+          method: methods?.get,
           headers: {
             Authorization: `${ApiUrlConstance?.bearer} eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7Il9pZCI6MX0sImlhdCI6MTczODEyNTg4Mn0.CPD_pjsl__yHgZBNNAoEG6xMhQyb6cSZ41LQHyLH9s8`,
             outlet: ApiUrlConstance?.secondOutlet,
@@ -61,27 +60,11 @@ const Orders = () => {
         },
       );
       if (response?.ok) {
-        setError('');
         const responseData = await response.json();
-        // console.log(data);
-
         return responseData?.data;
       } else {
         const responseData = await response.json();
-        switch (responseData?.msg) {
-          case errorMessage?.unauthorized_access:
-            setError(errorMessage?.unauthorized_access);
-            break;
-          case errorMessage?.order_details_not_found:
-            setError(errorMessage?.order_details_not_found);
-            break;
-          case errorMessage?.something_went_wrong:
-            setError(errorMessage?.something_went_wrong);
-            break;
-          default:
-            setError(errorMessage?.something_went_wrong);
-            break;
-        }
+        setError(responseData?.msg || errorMessage?.something_went_wrong);
       }
     } catch (error) {
       setError(errorMessage?.catch_error);
@@ -89,18 +72,15 @@ const Orders = () => {
     }
   };
 
-  // const twelveHoursFormat = (time: string) => {
-  //   const [hours, minutes] = time.split(':');
-  //   const hour = parseInt(hours);
-  //   const meridian = hour >= 12 ? 'PM' : 'AM';
-  //   const formattedHour = hour % 12 || 12;
-  //   return `${formattedHour}:${minutes} ${meridian}`;
-  // };
-
-  // const formatDate = (dateString: string) => {
-  //   const [year, month, day] = dateString?.split('-');
-  //   return `${month}/${day}/${year}`;
-  // };
+  const onRefresh = React.useCallback(async () => {
+    setIsRefreshing(true);
+    const fetchedData = await getOrderDetails();
+    if (fetchedData) {
+      setOrderList(fetchedData);
+      setFilteredOrders(fetchedData);
+    }
+    setIsRefreshing(false);
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -112,596 +92,362 @@ const Orders = () => {
       }
       setIsLoading(false);
     };
-
     fetchData();
   }, []);
 
   useEffect(() => {
-    setIsFiltering(true);
     const timer = setTimeout(() => {
       const filteredByGlobal = orderList?.filter(orderObj =>
         orderObj?.Name?.toLowerCase().includes(inputFilter.trim().toLowerCase()),
       );
-      if (statusFilter !== statusmode?.all) {
-        const filteredByStatus = filteredByGlobal?.filter(
-          orderObj => orderObj?.status.toString() === statusFilter,
-        );
-        setFilteredOrders(filteredByStatus);
-      } else {
-        setFilteredOrders(filteredByGlobal);
-      }
-      setIsFiltering(false);
-    }, 500);
+      const finalFiltered = statusFilter !== statusmode?.all
+        ? filteredByGlobal?.filter(orderObj => orderObj?.status.toString() === statusFilter)
+        : filteredByGlobal;
+      setFilteredOrders(finalFiltered);
+    }, 300);
 
-    return () => {
-      clearTimeout(timer);
-    };
+    return () => clearTimeout(timer);
   }, [inputFilter, statusFilter, orderList]);
+
+  const OrderCard = ({order}: {order: orderType}) => (
+    <View style={styles.card}>
+      <View style={styles.cardHeader}>
+        <View style={styles.orderIdContainer}>
+          <Text style={styles.orderId}>#{order.id}</Text>
+          <View style={[statusContainerStyles[order.status], styles.statusBadge]}>
+            <Text style={statusStyles[order.status]}>
+              {STATUS_MAP?.[order.status]?.label}
+            </Text>
+          </View>
+        </View>
+        <MenuView
+          onPressAction={({nativeEvent}) => {
+            if (nativeEvent.event === 'View Order') {
+              navigation.navigate("viewOrder", {id: order.id});
+            } else if (nativeEvent.event === 'Recent orders') {
+              navigation.navigate('RecentOrdersOfUsers', {name: order.Name});
+            }
+          }}
+          actions={[
+            {id: 'View Order', title: 'View Order', titleColor: '#007AFF'},
+            {id: 'Recent orders', title: 'Recent Orders', titleColor: '#007AFF'},
+          ]}
+          shouldOpenOnLongPress={false}>
+          <Image
+            source={{uri: 'https://cdn-icons-png.flaticon.com/512/7066/7066144.png'}}
+            style={styles.menuIcon}
+          />
+        </MenuView>
+      </View>
+      
+      <View style={styles.cardContent}>
+        <View style={styles.customerInfo}>
+          <Text style={styles.customerName}>{order.Name}</Text>
+          <Text style={styles.emailText}>{order.email}</Text>
+          <Text style={styles.mobilenoText}>{order.mobile_no}</Text>
+
+        </View>
+        
+        <View style={styles.orderDetails}>
+          <View style={styles.detailRow}>
+            <Text style={styles.detailLabel}>Fulfillment:</Text>
+            <Text style={styles.detailValue}>
+              {formatDate(order.date)} at {twelveHoursFormat(order.time)}
+            </Text>
+          </View>
+          <View style={styles.detailRow}>
+            <Text style={styles.detailLabel}>Type:</Text>
+            <Text style={styles.detailValue}>{order.type}</Text>
+          </View>
+          <View style={styles.detailRow}>
+            <Text style={styles.detailLabel}>Amount:</Text>
+            <Text style={styles.amount}>${order.Amount}</Text>
+          </View>
+        </View>
+      </View>
+    </View>
+  );
 
   if (error) {
     return (
       <SafeAreaView style={styles.errorContainer}>
-        <Text style={styles.errorMsgText}>{error}</Text>
+        <Text style={styles.errorText}>{error}</Text>
+        <TouchableOpacity style={styles.retryButton} onPress={onRefresh}>
+          <Text style={styles.retryText}>Retry</Text>
+        </TouchableOpacity>
       </SafeAreaView>
     );
   }
 
-  // const getOrderIdDetails= async(id: number) => {
-  //   setModalVisible(!isModalVisible);
-  //   try {
-  //     const url = `${ApiUrlConstance?.chefgaApiUrl}/${ApiUrlConstance?.order}/${id}`;
-  //     const response = await fetch(url, {
-  //       method:  methods?.get,
-  //       headers: {
-  //         Authorization: `${ApiUrlConstance?.bearer} eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7Il9pZCI6MX0sImlhdCI6MTczODEyNTg4Mn0.CPD_pjsl__yHgZBNNAoEG6xMhQyb6cSZ41LQHyLH9s8`,
-  //         outlet: ApiUrlConstance?.secondOutlet,
-  //       },
-  //     });
-  //     if (response.ok) {
-  //       setError('');
-  //       const responseData = await response.json();
-  //       setViewOrderDetails(responseData?.data);
-  //     } else {
-  //       const responseData = await response.json();
-  //       switch (responseData?.msg) {
-  //         case errorMessage?.unauthorized_access:
-  //           setError(errorMessage?.unauthorized_access);
-  //           break;
-  //         case errorMessage?.order_details_not_found_for_id:
-  //           setError(errorMessage?.order_details_not_found_for_id);
-  //           break;
-  //         case errorMessage?.something_went_wrong:
-  //           setError(errorMessage?.something_went_wrong);
-  //           break;
-  //         default:
-  //           setError(errorMessage?.something_went_wrong);
-  //           break;
-  //       }
-  //     }
-  //   } catch (error) {
-  //     setError(errorMessage?.catch_error);
-  //     console.error('Error fetching order details:', error);
-  //   }
-  // }
-
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.searchHeader}>
-        <View style={styles.inputContainer}>
-          <TextInput
-            placeholder="Search by name..."
-            style={styles.inputBox}
-            value={inputFilter}
-            onChangeText={text => setInputFilter(text)}
-          />
-          {inputFilter.length > 0 ? (
-            <TouchableOpacity onPress={() => setInputFilter('')}>
-              <Image
-                source={{
-                  uri: 'https://static-00.iconduck.com/assets.00/cross-mark-emoji-256x256-5xa7ff4l.png',
-                }}
-                style={styles.searchCancelImg}
-              />
-            </TouchableOpacity>
-          ) : (
-            <TouchableOpacity>
-              <Image
-                source={{
-                  uri: 'https://img.icons8.com/ios7/600/search.png',
-                }}
-                style={styles.searchIconImg}
-              />
-            </TouchableOpacity>
-          )}
-        </View>
-        <View style={styles.filtersBlock}>
-          <Text style={styles.filtersText}>Filter by status</Text>
-          <Dropdown
-            style={styles.dropdown}
-            data={statusOptions}
-            maxHeight={180}
-            labelField="label"
-            valueField="value"
-            placeholder="Select status"
-            value={statusFilter}
-            onChange={item => setStatusFilter(item.value)}
-            iconStyle={{marginRight: 10}}
-          />
+      <View style={styles.header}>
+        <View style={styles.searchContainer}>
+          <View style={styles.searchInputContainer}>
+            <Image
+              source={{uri: 'https://img.icons8.com/ios7/600/search.png'}}
+              style={styles.searchIcon}
+            />
+            <TextInput
+              placeholder="Search by name..."
+              placeholderTextColor="#666"
+              style={styles.searchInput}
+              value={inputFilter}
+              onChangeText={setInputFilter}
+            />
+            {inputFilter.length > 0 && (
+              <TouchableOpacity onPress={() => setInputFilter('')}>
+                <Image
+                  source={{uri: 'https://static-00.iconduck.com/assets.00/cross-mark-emoji-256x256-5xa7ff4l.png'}}
+                  style={styles.clearIcon}
+                />
+              </TouchableOpacity>
+            )}
+          </View>
+          
+          <View style={styles.filterContainer}>
+            <Text style={styles.filterLabel}>Status</Text>
+            <Dropdown
+              style={styles.dropdown}
+              data={statusOptions}
+              maxHeight={180}
+              labelField="label"
+              valueField="value"
+              placeholder="All"
+              value={statusFilter}
+              onChange={item => setStatusFilter(item.value)}
+              placeholderStyle={styles.dropdownPlaceholder}
+              selectedTextStyle={styles.dropdownSelectedText}
+            />
+          </View>
         </View>
       </View>
-      {isLoading || isFiltering ? (
-        <ActivityIndicator size={40} style={styles.loading}></ActivityIndicator>
+
+      {isLoading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#007AFF" />
+        </View>
       ) : (
-        <ScrollView style={styles.cardWrapper}>
-          {filteredOrders?.length ? (
-            filteredOrders.map((obj: orderType, index) => (
-              <View key={index} style={styles.card}>
-                <MenuView
-                  onPressAction={({nativeEvent}) => {
-                    const selectedId = nativeEvent.event;
-                    if (selectedId === 'View Order') {
-                      console.log('view order');
-                      navigation.navigate("viewOrder",{id:obj.id})
-                    } else if (selectedId === 'Recent orders') {
-                      console.log('recent order');
-                      navigation.navigate('RecentOrdersOfUsers', {
-                        name: obj.Name,
-                      });
-                    }
-                  }}
-                  actions={[
-                    {
-                      id: 'View Order',
-                      title: 'View Order',
-                      titleColor: 'Black',
-                    },
-                    {
-                      id: 'Recent orders',
-                      title: 'Recent Orders',
-                      titleColor: 'Black',
-                    },
-                  ]}
-                  shouldOpenOnLongPress={false}
-                  style={{alignSelf: 'flex-end'}}>
-                  <Image
-                    source={{
-                      uri: 'https://cdn-icons-png.flaticon.com/512/7066/7066144.png',
-                    }}
-                    style={styles.menuIcon}
-                  />
-                </MenuView>
-                <View style={styles.valuePairs}>
-                  <Text style={styles.label}>Order ID</Text>
-                  <Text style={styles.colon}>:</Text>
-                  <Text style={styles.cardText}>{obj?.id}</Text>
-                </View>
-                <View style={styles.valuePairs}>
-                  <Text style={styles.label}>Name</Text>
-                  <Text style={styles.colon}>:</Text>
-                  <Text style={styles.cardText}>{obj?.Name}</Text>
-                </View>
-                <View style={styles.valuePairs}>
-                  <Text style={styles.label}>To Be Fulfilled On</Text>
-                  <Text style={styles.colon}>:</Text>
-                  <Text style={styles.cardText}>
-                    {formatDate(obj?.date)} at {twelveHoursFormat(obj?.time)}
-                  </Text>
-                </View>
-                <View style={styles.valuePairs}>
-                  <Text style={styles.label}>Email</Text>
-                  <Text style={styles.colon}>:</Text>
-                  <Text style={styles.cardText}>{obj?.email}</Text>
-                </View>
-                <View style={styles.valuePairs}>
-                  <Text style={styles.label}>Order Type</Text>
-                  <Text style={styles.colon}>:</Text>
-                  <Text style={styles.cardText}>{obj?.type}</Text>
-                </View>
-                <View style={styles.valuePairs}>
-                  <Text style={styles.label}>Amount</Text>
-                  <Text style={styles.colon}>:</Text>
-                  <Text style={styles.cardText}>${obj?.Amount}</Text>
-                </View>
-                <View style={styles.valuePairs}>
-                  <Text style={styles.label}>Status</Text>
-                  <Text style={styles.colon}>:</Text>
-                  <View style={statusContainerStyles[obj?.status]}>
-                    <Text style={statusStyles[obj?.status]}>
-                      {STATUS_MAP?.[obj?.status]?.label}
-                    </Text>
-                  </View>
-                </View>
-                {/* <TouchableOpacity onPress={() => {
-                                getOrderIdDetails(obj?.id);
-                            }} style={{ alignSelf: "center", backgroundColor: "#234afa", padding: 8, borderRadius: 8 }}>
-                                <Text style={{ color: "white", fontWeight: "bold", fontSize: 16 }}>View Order</Text>
-                            </TouchableOpacity> */}
-              </View>
+        <ScrollView
+          style={styles.scrollView}
+          refreshControl={
+            <RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />
+          }>
+          {filteredOrders?.length > 0 ? (
+            filteredOrders.map((order) => (
+              <OrderCard key={order.id} order={order} />
             ))
           ) : (
-            <Text style={styles.noOrdersText}>No orders found</Text>
+            <View style={styles.emptyContainer}>
+              <Text style={styles.emptyText}>No orders found</Text>
+            </View>
           )}
         </ScrollView>
       )}
-      {/* <View>
-        {isModalVisible && (
-          <Modal
-            animationType="slide"
-            transparent={true}
-            visible={isModalVisible}
-            onRequestClose={() => {
-              setModalVisible(!isModalVisible);
-              setViewOrderDetails([]);
-            }}>
-            <View style={styles.modalOverlay}>
-              <View style={styles.modalContent}>
-                <Text style={styles.modalTitle}>
-                  Order Details #{viewOrderDetails[0]?.id}
-                </Text>
-                <View style={styles.separator}></View>
-
-                <ScrollView style={styles.scrollContent}>
-                  <Text style={styles.sectionTitle}>Customer Information</Text>
-                  <View style={styles.customerInfoRow}>
-                    <Text style={styles.customerLabel}>Name:</Text>
-                    <Text style={styles.value}>
-                      {viewOrderDetails?.[0]?.customer_details?.name}
-                    </Text>
-                  </View>
-                  <View style={styles.customerInfoRow}>
-                    <Text style={styles.customerLabel}>Email:</Text>
-                    <Text style={styles.value}>
-                      {viewOrderDetails?.[0]?.customer_details?.email}
-                    </Text>
-                  </View>
-                  <View style={styles.customerInfoRow}>
-                    <Text style={styles.customerLabel}>Phone:</Text>
-                    <Text style={styles.value}>
-                      {viewOrderDetails?.[0]?.customer_details?.mobile_no}
-                    </Text>
-                  </View>
-
-                  <Text
-                    style={[styles.sectionTitle, styles.sectionTitleUpdated]}>
-                    Order Items
-                  </Text>
-                  {viewOrderDetails?.[0]?.CartItems.map(
-                    (cartItems: any, index: number) => (
-                      <View key={index} style={styles.orderItemRow}>
-                        <Text style={styles.orderItemName}>
-                          {cartItems?.display_name} X{' '}
-                          {Number(cartItems?.quantity)}
-                        </Text>
-                        <Text style={styles.orderItemPrice}>
-                          ${cartItems?.price}
-                        </Text>
-                      </View>
-                    ),
-                  )}
-
-                  <View style={[styles.separator, styles.separator1]}></View>
-                  <Text style={styles.sectionTitle}>Order Summary</Text>
-                  <View style={styles.summaryRow}>
-                    <Text style={styles.label}>Subtotal:</Text>
-                    <Text style={styles.value}>
-                      ${viewOrderDetails?.[0]?.sub_total}
-                    </Text>
-                  </View>
-                  <View style={styles.summaryRow}>
-                    <Text style={styles.label}>Tax:</Text>
-                    <Text style={styles.value}>
-                      ${viewOrderDetails?.[0]?.tax}
-                    </Text>
-                  </View>
-                  {viewOrderDetails[0]?.delivery_fee && (
-                    <View style={styles.summaryRow}>
-                      <Text style={styles.label}>Delivery Fee:</Text>
-                      <Text style={styles.value}>
-                        ${viewOrderDetails?.[0]?.delivery_fee}
-                      </Text>
-                    </View>
-                  )}
-                  <View style={styles.summaryRow}>
-                    <Text style={styles.total}>Total:</Text>
-                    <Text style={styles.totalValue}>
-                      ${viewOrderDetails?.[0]?.total}
-                    </Text>
-                  </View>
-
-                  <Text
-                    style={[styles.sectionTitle, styles.sectionTitleUpdated]}>
-                    Additional Details
-                  </Text>
-                  <View style={styles.infoRow}>
-                    <Text style={styles.label1}>Order Type:</Text>
-                    <Text style={styles.value}>
-                      {viewOrderDetails?.[0]?.OrderTypeDefinition.Type}
-                    </Text>
-                  </View>
-                  <View style={styles.infoRow}>
-                    <Text style={styles.label1}>Schedule Date:</Text>
-                    <Text style={styles.value}>
-                      {new Date(
-                        viewOrderDetails?.[0]?.created_at * 1000,
-                      ).toLocaleDateString()}
-                    </Text>
-                  </View>
-                  <View style={styles.infoRow}>
-                    <Text style={styles.label1}>Schedule Time:</Text>
-                    <Text style={styles.value}>
-                      {twelveHoursFormat(
-                        new Date(
-                          viewOrderDetails?.[0]?.created_at * 1000,
-                        ).toLocaleTimeString(),
-                      )}
-                    </Text>
-                  </View>
-                </ScrollView>
-
-                <TouchableOpacity
-                  onPress={() => {
-                    setModalVisible(!isModalVisible);
-                    setViewOrderDetails([]);
-                  }}
-                  style={styles.closeButton}>
-                  <Text style={styles.closeButtonText}>Close</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </Modal>
-        )}
-      </View> */}
     </SafeAreaView>
   );
 };
-export default Orders;
-const styles = StyleSheet.create({
-  inputContainer: {
-    display: 'flex',
-    flexDirection: 'row',
-    alignItems: 'center',
-    width: '60%',
-    borderWidth: 1,
-    borderRadius: 8,
-    backgroundColor: 'white',
-    height: 45,
-    marginLeft: 8,
-    marginTop: 5,
-  },
 
-  inputBox: {
-    width: '80%',
-    fontSize: 17,
-    color: 'black',
-  },
-  total: {
-    fontSize: 19,
-    fontWeight: 'bold',
-    color: 'black',
-    width: 140,
-    marginTop: 5,
-  },
-  totalValue: {
-    color: 'black',
-    textAlign: 'right',
-    fontSize: 17,
-    marginTop: 5,
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalContent: {
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    padding: 20,
-    width: '90%',
-    maxHeight: '80%',
-    elevation: 5,
-  },
-  modalTitle: {
-    fontSize: 21,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 10,
-    marginTop: 10,
-  },
-  separator: {
-    borderBottomWidth: 1,
-    marginBottom: 15,
-  },
-  separator1: {
-    borderBottomWidth: 1,
-    marginBottom: 30,
-  },
-  scrollContent: {
-    marginVertical: 10,
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 10,
-    color: 'black',
-  },
-  sectionTitleUpdated: {
-    marginTop: 15,
-  },
-  infoRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 10,
-  },
-  customerInfoRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 10,
-  },
-  value: {
-    color: 'black',
-    textAlign: 'right',
-    fontSize: 16,
-  },
-  orderItemRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 5,
-  },
-  orderItemName: {
-    width: '80%',
-    color: 'black',
-    fontSize: 16,
-  },
-  orderItemPrice: {
-    color: 'black',
-    fontSize: 16,
-  },
-  summaryRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 5,
-  },
-  closeButton: {
-    backgroundColor: '#234afa',
-    padding: 10,
-    borderRadius: 8,
-    marginTop: 20,
-    alignItems: 'center',
-  },
-  closeButtonText: {
-    color: 'white',
-    fontWeight: 'bold',
-    fontSize: 16,
-  },
-  menu: {
-    alignSelf: 'flex-end',
-  },
-  noOrdersText: {
-    fontSize: 25,
-    textAlign: 'center',
-    marginTop: 200,
-    fontWeight: '600',
-  },
-  dropdown: {
-    borderWidth: 1,
-    height: 45,
-    paddingLeft: 10,
-    width: '100%',
-    borderRadius: 8,
-    backgroundColor: '#fff',
-    borderColor: '#ccc',
-  },
-  errorMsgText: {
-    alignSelf: 'center',
-    fontWeight: 'bold',
-    fontSize: 28,
-  },
-  loading: {
-    marginTop: 250,
-  },
-  colon: {
-    marginRight: 10,
-    fontSize: 17,
-    fontWeight: 'bold',
-  },
-  errorContainer: {
-    flex: 1,
-    flexDirection: 'column',
-    justifyContent: 'center',
-    width: Dimensions.get('screen').width,
-    padding: 10,
-    backgroundColor: '#fcf6e8',
-  },
+const styles = StyleSheet.create({
   container: {
     flex: 1,
-    width: Dimensions.get('screen').width,
-    padding: 10,
-    backgroundColor: '#e6e6e6',
+    backgroundColor: '#F2F2F7',
   },
-  inputText: {
-    borderWidth: 1,
-    height: 45,
-    borderRadius: 10,
-    fontSize: 17,
-    marginBottom: 20,
-    paddingHorizontal: 10,
-    borderColor: '#ccc',
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: '#fff',
-    width: '60%',
+    paddingHorizontal: 16,
+    paddingTop: 8,
+    paddingBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E5EA',
   },
-  cardWrapper: {
+  searchContainer: {
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    gap: 12,
+    flex: 1, 
+  },
+  searchInputContainer: {
+    flex: 1, 
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F2F2F7',
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    height: 40,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 18,
+    color: '#000',
+    marginLeft: 8,
+  },
+  filterContainer: {
+    gap: 8,
+    width: '35%', // Added to give appropriate width to filter section
+  },
+  searchIcon: {
+    width: 20,
+    height: 20,
+    tintColor: '#666',
+  },
+  clearIcon: {
+    width: 12,
+    height: 12,
+    tintColor: '#666',
+  },
+  filterLabel: {
+    fontSize: 15,
+    fontWeight: '500',
+    color: '#666',
+  },
+  dropdown: {
+    flex: 1, 
+    height: 40,
+    backgroundColor: '#F2F2F7',
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    borderWidth: 0,
+  },
+  dropdownPlaceholder: {
+    fontSize: 18,
+    color: '#666',
+  },
+  dropdownSelectedText: {
+    fontSize: 18,
+    color: '#000',
+  },
+  scrollView: {
     flex: 1,
   },
   card: {
-    backgroundColor: 'white',
-    padding: 15,
-    marginBottom: 15,
-    borderRadius: 10,
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
-    shadowOpacity: 0.2,
-    shadowRadius: 5,
-    elevation: 5,
+    backgroundColor: '#fff',
+    marginHorizontal: 16,
+    marginTop: 16,
+    borderRadius: 12,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: {width: 0, height: 2},
+        shadowOpacity: 0.1,
+        shadowRadius: 8,
+      },
+      android: {
+        elevation: 4,
+      },
+    }),
   },
-  valuePairs: {
+  cardHeader: {
     flexDirection: 'row',
-    marginBottom: 10,
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F2F2F7',
+  },
+  orderIdContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  orderId: {
+    fontSize: 17,
+    fontWeight: '600',
+    color: '#000',
+  },
+  statusBadge: {
+    borderRadius: 6,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+  },
+  menuIcon: {
+    width: 24,
+    height: 24,
+    tintColor: '#666',
+  },
+  cardContent: {
+    padding: 16,
+    gap:16
+  },
+  customerInfo: {
+    gap: 4,
+  },
+  customerName: {
+    fontSize: 17,
+    fontWeight: '600',
+    color: '#000',
+  },
+  emailText: {
+    fontSize: 15,
+    color: '#666',
+  },
+  mobilenoText: {
+    fontSize: 15,
+    color: '#666',
+  },
+  orderDetails: {
+    gap: 8,
+  },
+  detailRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
   },
-  label: {
-    fontSize: 16,
-    fontWeight: '500',
-    color: 'black',
-    width: 140,
+  detailLabel: {
+    fontSize: 15,
+    color: '#666',
   },
-  label1: {
+  detailValue: {
+    fontSize: 15,
+    color: '#000',
+  },
+  amount: {
     fontSize: 17,
-    fontWeight: '500',
-    color: 'black',
+    fontWeight: '600',
+    color: '#3b3b3b',
   },
-  customerLabel: {
-    fontSize: 17,
-    fontWeight: 'bold',
-    color: 'black',
-  },
-  cardText: {
-    fontSize: 16,
-    color: 'black',
+  loadingContainer: {
     flex: 1,
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-  },
-  success: {
-    backgroundColor: 'white',
-    borderColor: 'green',
-    borderWidth: 2,
-    width: 100,
-    fontSize: 16,
-    color: 'black',
-    display: 'flex',
-    flexDirection: 'column',
     justifyContent: 'center',
     alignItems: 'center',
-    height: 28,
-    borderRadius: 10,
   },
-  searchHeader: {
-    flexDirection: 'row',
-    marginBottom: 18,
-    alignItems: 'flex-end',
-  },
-  searchCancelImg: {marginLeft: 18, height: 14, width: 14},
-  searchIconImg: {height: 25, width: 25},
-  filtersBlock: {
-    flexDirection: 'column',
-    width: '34%',
-    marginLeft: 10,
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
     alignItems: 'center',
+    padding: 32,
   },
-  filtersText: {
-    fontWeight: '500',
-    fontSize: 15,
+  emptyText: {
+    fontSize: 17,
+    color: '#666',
+    textAlign: 'center',
   },
-  menuIcon: {height: 20, width: 20, alignSelf: 'flex-end'},
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 32,
+    backgroundColor: '#F2F2F7',
+  },
+  errorText: {
+    fontSize: 17,
+    color: '#FF3B30',
+    textAlign: 'center',
+    marginBottom: 16,
+  },
+  retryButton: {
+    backgroundColor: '#007AFF',
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 8,
+  },
+  retryText: {
+    fontSize: 17,
+    fontWeight: '600',
+    color: '#fff',
+  },
 });
+
+export default Orders;
