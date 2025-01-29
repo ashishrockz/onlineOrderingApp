@@ -46,8 +46,6 @@ const Orders = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<string>(statusmode?.all);
-  const [isModalVisible, setModalVisible] = useState(false);
-  const [viewOrderDetails, setViewOrderDetails] = useState<any[]>([]);
   const [isFiltering, setIsFiltering] = useState(false);
 
   const getOrderDetails = async () => {
@@ -148,43 +146,43 @@ const Orders = () => {
     );
   }
 
-  const getOrderIdDetails= async(id: number) => {
-    setModalVisible(!isModalVisible);
-    try {
-      const url = `${ApiUrlConstance?.chefgaApiUrl}/${ApiUrlConstance?.order}/${id}`;
-      const response = await fetch(url, {
-        method:  methods?.get,
-        headers: {
-          Authorization: `${ApiUrlConstance?.bearer} eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7Il9pZCI6MX0sImlhdCI6MTczODEyNTg4Mn0.CPD_pjsl__yHgZBNNAoEG6xMhQyb6cSZ41LQHyLH9s8`,
-          outlet: ApiUrlConstance?.secondOutlet,
-        },
-      });
-      if (response.ok) {
-        setError('');
-        const responseData = await response.json();
-        setViewOrderDetails(responseData?.data);
-      } else {
-        const responseData = await response.json();
-        switch (responseData?.msg) {
-          case errorMessage?.unauthorized_access:
-            setError(errorMessage?.unauthorized_access);
-            break;
-          case errorMessage?.order_details_not_found_for_id:
-            setError(errorMessage?.order_details_not_found_for_id);
-            break;
-          case errorMessage?.something_went_wrong:
-            setError(errorMessage?.something_went_wrong);
-            break;
-          default:
-            setError(errorMessage?.something_went_wrong);
-            break;
-        }
-      }
-    } catch (error) {
-      setError(errorMessage?.catch_error);
-      console.error('Error fetching order details:', error);
-    }
-  }
+  // const getOrderIdDetails= async(id: number) => {
+  //   setModalVisible(!isModalVisible);
+  //   try {
+  //     const url = `${ApiUrlConstance?.chefgaApiUrl}/${ApiUrlConstance?.order}/${id}`;
+  //     const response = await fetch(url, {
+  //       method:  methods?.get,
+  //       headers: {
+  //         Authorization: `${ApiUrlConstance?.bearer} eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7Il9pZCI6MX0sImlhdCI6MTczODEyNTg4Mn0.CPD_pjsl__yHgZBNNAoEG6xMhQyb6cSZ41LQHyLH9s8`,
+  //         outlet: ApiUrlConstance?.secondOutlet,
+  //       },
+  //     });
+  //     if (response.ok) {
+  //       setError('');
+  //       const responseData = await response.json();
+  //       setViewOrderDetails(responseData?.data);
+  //     } else {
+  //       const responseData = await response.json();
+  //       switch (responseData?.msg) {
+  //         case errorMessage?.unauthorized_access:
+  //           setError(errorMessage?.unauthorized_access);
+  //           break;
+  //         case errorMessage?.order_details_not_found_for_id:
+  //           setError(errorMessage?.order_details_not_found_for_id);
+  //           break;
+  //         case errorMessage?.something_went_wrong:
+  //           setError(errorMessage?.something_went_wrong);
+  //           break;
+  //         default:
+  //           setError(errorMessage?.something_went_wrong);
+  //           break;
+  //       }
+  //     }
+  //   } catch (error) {
+  //     setError(errorMessage?.catch_error);
+  //     console.error('Error fetching order details:', error);
+  //   }
+  // }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -243,7 +241,7 @@ const Orders = () => {
                     const selectedId = nativeEvent.event;
                     if (selectedId === 'View Order') {
                       console.log('view order');
-                      getOrderIdDetails(obj.id);
+                      navigation.navigate("viewOrder",{id:obj.id})
                     } else if (selectedId === 'Recent orders') {
                       console.log('recent order');
                       navigation.navigate('RecentOrdersOfUsers', {
@@ -325,7 +323,7 @@ const Orders = () => {
           )}
         </ScrollView>
       )}
-      <View>
+      {/* <View>
         {isModalVisible && (
           <Modal
             animationType="slide"
@@ -452,7 +450,7 @@ const Orders = () => {
             </View>
           </Modal>
         )}
-      </View>
+      </View> */}
     </SafeAreaView>
   );
 };

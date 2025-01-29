@@ -46,7 +46,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-around",
     backgroundColor: "#f1f1f1",
-    paddingVertical: 10,
     borderBottomWidth: 2,
     borderBottomColor: "#ddd",
   },
@@ -70,6 +69,5 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     flex: 1,
-    padding: 10,
   },
 });
