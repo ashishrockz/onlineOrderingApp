@@ -181,9 +181,9 @@ const Orders = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <View style={styles.searchContainer}>
-          <View style={styles.searchInputContainer}>
+       <View style={styles.header}>
+        <View style={styles.searchSection}>
+          <View style={styles.searchInputWrapper}>
             <Image
               source={{uri: 'https://img.icons8.com/ios7/600/search.png'}}
               style={styles.searchIcon}
@@ -196,7 +196,10 @@ const Orders = () => {
               onChangeText={setInputFilter}
             />
             {inputFilter.length > 0 && (
-              <TouchableOpacity onPress={() => setInputFilter('')}>
+              <TouchableOpacity 
+                style={styles.clearButton}
+                onPress={() => setInputFilter('')}
+              >
                 <Image
                   source={{uri: 'https://static-00.iconduck.com/assets.00/cross-mark-emoji-256x256-5xa7ff4l.png'}}
                   style={styles.clearIcon}
@@ -205,15 +208,15 @@ const Orders = () => {
             )}
           </View>
           
-          <View style={styles.filterContainer}>
-            <Text style={styles.filterLabel}>Status</Text>
+          <View style={styles.filterSection}>
+            <Text style={styles.filterLabel}>Filtered By Status</Text>
             <Dropdown
               style={styles.dropdown}
               data={statusOptions}
               maxHeight={180}
               labelField="label"
               valueField="value"
-              placeholder="All"
+              placeholder="Status: All"
               value={statusFilter}
               onChange={item => setStatusFilter(item.value)}
               placeholderStyle={styles.dropdownPlaceholder}
@@ -254,39 +257,52 @@ const styles = StyleSheet.create({
     backgroundColor: '#F2F2F7',
   },
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
     backgroundColor: '#fff',
     paddingHorizontal: 16,
-    paddingTop: 8,
-    paddingBottom: 16,
+    paddingTop: 6,
+    paddingBottom: 12,
     borderBottomWidth: 1,
     borderBottomColor: '#E5E5EA',
+    gap: 16,
   },
-  searchContainer: {
-    flexDirection: 'row', 
-    alignItems: 'center', 
+  headerTitle: {
+    marginBottom: 8,
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: '700',
+    color: '#000',
+    marginBottom: 4,
+  },
+  subtitle: {
+    fontSize: 15,
+    color: '#666',
+  },
+  searchSection: {
+    flexDirection: 'row',
     gap: 12,
-    flex: 1, 
+    alignItems: 'flex-end',
   },
-  searchInputContainer: {
-    flex: 1, 
+  searchInputWrapper: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#F2F2F7',
-    borderRadius: 10,
+    borderRadius: 12,
     paddingHorizontal: 12,
-    height: 40,
+    height: 50,
+    borderWidth: 1,
+    borderColor: '#E5E5EA',
   },
   searchInput: {
     flex: 1,
     fontSize: 18,
     color: '#000',
     marginLeft: 8,
+    height: '100%',
   },
-  filterContainer: {
-    gap: 8,
-    width: '35%', // Added to give appropriate width to filter section
+  clearButton: {
+    padding: 4,
   },
   searchIcon: {
     width: 20,
@@ -294,30 +310,34 @@ const styles = StyleSheet.create({
     tintColor: '#666',
   },
   clearIcon: {
-    width: 12,
-    height: 12,
+    width: 16,
+    height: 16,
     tintColor: '#666',
   },
-  filterLabel: {
-    fontSize: 15,
-    fontWeight: '500',
-    color: '#666',
+  filterSection: {
+    width: 140, // Fixed width for the dropdown
+  },
+  filterLabel:{
+    fontSize:16,
+    fontWeight:'500',
+    paddingLeft:6
   },
   dropdown: {
-    flex: 1, 
-    height: 40,
+    height: 50,
     backgroundColor: '#F2F2F7',
-    borderRadius: 10,
+    borderRadius: 12,
     paddingHorizontal: 12,
-    borderWidth: 0,
+    borderWidth: 1,
+    borderColor: '#E5E5EA',
   },
   dropdownPlaceholder: {
-    fontSize: 18,
+    fontSize: 16,
     color: '#666',
   },
   dropdownSelectedText: {
-    fontSize: 18,
+    fontSize: 16,
     color: '#000',
+    fontWeight: '500',
   },
   scrollView: {
     flex: 1,
