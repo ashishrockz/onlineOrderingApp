@@ -144,13 +144,13 @@ const Orders = () => {
         <Text style={styles.customerName}>{order.Name}</Text>
          <View style={{flexDirection:"row",alignItems:"center"}}>
           <Image source={{
-              uri:"https://cdn-icons-png.flaticon.com/512/646/646094.png"
+              uri:"https://img.icons8.com/ios/50/mail.png"
             }} style={styles.iconsImage}></Image>
             <Text style={styles.emailText}>{order.email}</Text>
          </View>
          <View style={{flexDirection:"row",alignItems:"center"}}>
           <Image source={{
-              uri:"https://png.pngtree.com/png-clipart/20191120/original/pngtree-phone-icon-png-image_5065646.jpg"
+              uri:"https://img.icons8.com/ios/50/phone.png"
             }} style={styles.iconsImage}></Image>
             <Text style={styles.mobilenoText}>{order.mobile_no}</Text>
          </View>
@@ -194,7 +194,7 @@ const Orders = () => {
         <View style={styles.searchSection}>
           <View style={styles.searchInputWrapper}>
             <Image
-              source={{uri: 'https://img.icons8.com/ios7/600/search.png'}}
+              source={{uri: 'https://img.icons8.com/ios/50/search.png'}}
               style={styles.searchIcon}
             />
             <TextInput
@@ -210,7 +210,7 @@ const Orders = () => {
                 onPress={() => setInputFilter('')}
               >
                 <Image
-                  source={{uri: 'https://static-00.iconduck.com/assets.00/cross-mark-emoji-256x256-5xa7ff4l.png'}}
+                  source={{uri: 'https://img.icons8.com/ios/50/delete-sign.png'}}
                   style={styles.clearIcon}
                 />
               </TouchableOpacity>
@@ -484,6 +484,7 @@ const styles = StyleSheet.create({
     height:18,
     width:18,
     marginRight:8,
+    tintColor:'blue'
   }
 });
 

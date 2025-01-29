@@ -45,9 +45,9 @@ const styles = StyleSheet.create({
   tabContainer: {
     flexDirection: "row",
     justifyContent: "space-around",
-    backgroundColor: "#f1f1f1",
-    borderBottomWidth: 2,
-    borderBottomColor: "#ddd",
+    backgroundColor: "#fff",
+    borderBottomWidth: 1,
+    borderBottomColor: "#e0e0e0",
   },
   tabButton: {
     flex: 1,

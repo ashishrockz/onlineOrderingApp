@@ -9,20 +9,21 @@ import {
   View,
   FlatList,
   Image,
+  ActivityIndicator,
 } from 'react-native';
 import { PromotionsData } from '../types/type';
 import { ApiUrlConstance, errorMessage, methods } from '../constance/constance';
- 
- 
+
 const Promotions = () => {
   const [inputFilter, setInputFilter] = useState<string>('');
   const [filteredData, setFilteredData] = useState([]);
   const [promotionData, setPromotionData] = useState([]);
   const [error, setError] = useState('');
- 
-   const getPromotionsDetails = async () => {
+  const [loading, setLoading] = useState(true);
+
+  const getPromotionsDetails = async () => {
     try {
-      const token =  await AsyncStorage.getItem('userToken');
+      const token = await AsyncStorage.getItem('userToken');
       const response = await fetch(`${ApiUrlConstance?.apiUrl}/${ApiUrlConstance?.promotion}`, {
         method: methods?.get,
         headers: {
@@ -32,39 +33,25 @@ const Promotions = () => {
       });
       if (response.ok) {
         setError('');
-        const responceData = await response.json();
-        setPromotionData(responceData);
-        setFilteredData(responceData);
-        console.log(responceData);
-        
-        return responceData?.data;
+        const responseData = await response.json();
+        setPromotionData(responseData);
+        setFilteredData(responseData);
       } else {
         const responseData = await response.json();
-        switch (responseData?.msg) {
-          case errorMessage?.unauthorized_access:
-            setError(errorMessage?.unauthorized_access);
-            break;
-          case errorMessage?.promotion_details_not_found:
-            setError(errorMessage?.promotion_details_not_found);
-            break;
-          case errorMessage?.something_went_wrong:
-            setError(errorMessage?.something_went_wrong);
-            break;
-          default:
-            setError(errorMessage?.something_went_wrong);
-            break;
-        }
+        setError(responseData?.msg || errorMessage?.something_went_wrong);
       }
     } catch (error) {
       setError(errorMessage?.catch_error);
       console.error('Error fetching Promotions details:', error);
+    } finally {
+      setLoading(false);
     }
-  };    
- 
+  };
+
   useEffect(() => {
     getPromotionsDetails();
   }, []);
- 
+
   useEffect(() => {
     const filteredDataOfUser = promotionData.filter((user: PromotionsData) => {
       const searchString = inputFilter.toLowerCase();
@@ -80,38 +67,55 @@ const Promotions = () => {
 
   const renderCard = ({ item }: { item: PromotionsData }) => (
     <View style={styles.card}>
-      <View style={styles.cardDetailsContainer}>
-        <Text style={styles.cardHeading}>Name:</Text>
-        <Text style={styles.cardDetail}>{item?.name}</Text>
+      <View style={styles.cardHeader}>
+        <View style={styles.nameContainer}>
+          <Text style={styles.cardName}>{item?.name}</Text>
+          <View style={styles.discountBadge}>
+            <Text style={styles.discountText}>{item?.discount_percentage}% OFF</Text>
+          </View>
+        </View>
+        <Text style={styles.codeText}>Code: {item?.discount_code}</Text>
       </View>
-      <View style={styles.cardDetailsContainer}>
-        <Text style={styles.cardHeading}>Phone:</Text>
-        <Text style={styles.cardDetail}>{item?.phone_number}</Text>
-      </View>
-      <View style={styles.cardDetailsContainer}>
-        <Text style={styles.cardHeading}>Email:</Text>
-        <Text style={styles.cardDetail}>{item?.email}</Text>
-      </View>
-      <View style={styles.cardDetailsContainer}>
-        <Text style={styles.cardHeading}>Code:</Text>
-        <Text style={styles.cardDetail}>{item?.discount_code}</Text>
-      </View>
-      <View style={styles.cardDetailsContainer}>
-        <Text style={styles.cardHeading}>Discount:</Text>
-        <Text style={styles.cardDetail}>{item?.discount_percentage}%</Text>
-      </View>
-      <View style={styles.cardDetailsContainer}>
-        <Text style={styles.cardHeading}>Registered On:</Text>
-        <Text style={styles.cardDetail}>
-          {new Date(item.start_date).toLocaleDateString()}
-        </Text>
+      
+      <View style={styles.cardDivider} />
+      
+      <View style={styles.cardBody}>
+        <View style={styles.infoRow}>
+          <View style={styles.infoItem}>
+            <Image
+              source={{ uri: 'https://img.icons8.com/ios/50/phone.png' }}
+              style={styles.infoIcon}
+            />
+            <Text style={styles.infoText}>{item?.phone_number}</Text>
+          </View>
+          <View style={styles.infoItem}>
+            <Image
+              source={{ uri: 'https://img.icons8.com/ios/50/mail.png' }}
+              style={styles.infoIcon}
+            />
+            <Text style={styles.infoText}>{item?.email}</Text>
+          </View>
+        </View>
+        <View style={styles.dateContainer}>
+          <Image
+            source={{ uri: 'https://img.icons8.com/ios/50/calendar.png' }}
+            style={styles.infoIcon}
+          />
+          <Text style={styles.dateText}>
+            Registered on: {new Date(item.start_date).toLocaleDateString()}
+          </Text>
+        </View>
       </View>
     </View>
   );
 
   const EmptyListMessage = () => (
     <View style={styles.emptyListContainer}>
-      <Text style={styles.noDataText}>No users found</Text>
+      <Image
+        source={{ uri: 'https://img.icons8.com/ios/100/search.png' }}
+        style={styles.emptyStateIcon}
+      />
+      <Text style={styles.noDataText}>No promotions found</Text>
       <Text style={styles.noDataSubText}>
         Try adjusting your search to find what you're looking for
       </Text>
@@ -119,146 +123,242 @@ const Promotions = () => {
   );
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#f1f1f1', margin: 10 }}>
-      <View style={styles.SearchHeader}>
-        <View style={styles.inputContainer}>
-          <TextInput
-            placeholder="Search by name..."
-            style={styles.inputBox}
-            value={inputFilter}
-            onChangeText={text => setInputFilter(text)}
-          />
-          {inputFilter.length > 0 ? (
-            <TouchableOpacity onPress={() => setInputFilter('')}>
-              <Image
-                source={{
-                  uri: 'https://static-00.iconduck.com/assets.00/cross-mark-emoji-256x256-5xa7ff4l.png',
-                }}
-                style={styles.searchCancelImg}
-              />
-            </TouchableOpacity>
-          ) : (
-            <TouchableOpacity>
-              <Image
-                source={{
-                  uri: 'https://img.icons8.com/ios7/600/search.png',
-                }}
-                style={styles.searchIconImg}
-              />
-            </TouchableOpacity>
-          )}
+    <SafeAreaView style={styles.container}>
+      <View style={styles.header}>
+        <View style={styles.searchContainer}>
+          <View style={styles.inputContainer}>
+            <Image
+              source={{ uri: 'https://img.icons8.com/ios/50/search.png' }}
+              style={styles.searchIcon}
+            />
+            <TextInput
+              placeholder="Search promotions..."
+              style={styles.input}
+              value={inputFilter}
+              onChangeText={text => setInputFilter(text)}
+              placeholderTextColor="#666"
+            />
+            {inputFilter.length > 0 && (
+              <TouchableOpacity onPress={() => setInputFilter('')} style={styles.clearButton}>
+                <Image
+                  source={{ uri: 'https://img.icons8.com/ios/50/delete-sign.png' }}
+                  style={styles.clearIcon}
+                />
+              </TouchableOpacity>
+            )}
+          </View>
         </View>
-        <Text style={styles.registrationText}>
-          Total Registrations: {filteredData?.length}
-        </Text>
+        <View style={styles.statsContainer}>
+          <Text style={styles.statsText}>
+            Total Promotions: {filteredData?.length}
+          </Text>
+        </View>
       </View>
-      <FlatList
-        data={filteredData}
-        keyExtractor={(_item, index) => index.toString()}
-        renderItem={renderCard}
-        contentContainerStyle={[
-          styles.cardContainer,
-          filteredData.length === 0 && styles.emptyListContentContainer,
-        ]}
-        ListEmptyComponent={EmptyListMessage}
-      />
+
+      {loading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#0066cc" />
+          <Text style={styles.loadingText}>Loading promotions...</Text>
+        </View>
+      ) : error ? (
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorText}>{error}</Text>
+        </View>
+      ) : (
+        <FlatList
+          data={filteredData}
+          keyExtractor={(_item, index) => index.toString()}
+          renderItem={renderCard}
+          contentContainerStyle={[
+            styles.listContainer,
+            filteredData.length === 0 && styles.emptyListContentContainer,
+          ]}
+          ListEmptyComponent={EmptyListMessage}
+          showsVerticalScrollIndicator={false}
+        />
+      )}
     </SafeAreaView>
   );
 };
 
 export default Promotions;
- 
- 
- 
+
 const styles = StyleSheet.create({
-  SearchHeader: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
+  container: {
+    flex: 1,
+    backgroundColor: '#f5f5f5',
+  },
+  header: {
+    flexDirection:'row',
+    justifyContent:'space-between',
+    alignItems:'center',
+    backgroundColor: '#fff',
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
+  },
+  searchContainer: {
+    width:"60%"
   },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    width: '50%',
-    borderWidth: 1,
-    borderRadius: 8,
-    backgroundColor: 'white',
-    height: 45,
-    marginLeft: 8,
-    marginTop: 5,
+    backgroundColor: '#f5f5f5',
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    height: 48,
   },
-  inputBox: {
-    width: '80%',
-    fontSize: 17,
-    color: 'black',
-    paddingLeft: 10,
+  searchIcon: {
+    width: 20,
+    height: 20,
+    tintColor: '#666',
+    marginRight: 8,
   },
-  searchCancelImg: {
-    marginLeft: 18,
-    height: 14,
-    width: 14,
-  },
-  searchIconImg: {
-    height: 25,
-    width: 25,
-  },
-  registrationText: {
-    padding: 10,
+  input: {
+    flex: 1,
     fontSize: 16,
-    fontWeight: 'bold',
+    color: '#333',
   },
-  cardContainer: {
-    paddingTop: 20,
+  clearButton: {
+    padding: 4,
+  },
+  clearIcon: {
+    width: 16,
+    height: 16,
+    tintColor: '#666',
+  },
+  statsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  statsText: {
+    fontSize: 14,
+    color: '#666',
+    fontWeight: '600',
+  },
+  listContainer: {
+    padding: 16,
   },
   card: {
     backgroundColor: '#fff',
-    padding: 15,
-    marginBottom: 10,
-    borderRadius: 8,
+    borderRadius: 16,
+    marginBottom: 16,
     shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
-    shadowRadius: 5,
-    elevation: 2,
+    shadowRadius: 8,
+    elevation: 3,
   },
-  cardTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 5,
+  cardHeader: {
+    padding: 16,
   },
-  cardDetail: {
-    fontSize: 15,
-    color: '#333',
-    marginBottom: 3,
-  },
-  cardDetailsContainer: {
+  nameContainer: {
     flexDirection: 'row',
-    marginBottom: 5,
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
   },
-  cardHeading: {
+  cardName: {
+    fontSize: 20,
     fontWeight: 'bold',
-    marginRight: 5,
-    fontSize:16
+    color: '#333',
+  },
+  discountBadge: {
+    backgroundColor: '#e8f5e9',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 12,
+  },
+  discountText: {
+    color: '#2e7d32',
+    fontWeight: '600',
+    fontSize: 14,
+  },
+  codeText: {
+    fontSize: 16,
+    color: '#666',
+    fontWeight: '600',
+  },
+  cardDivider: {
+    height: 1,
+    backgroundColor: '#e0e0e0',
+  },
+  cardBody: {
+    padding: 16,
+  },
+  infoRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 12,
+  },
+  infoItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  infoIcon: {
+    width: 16,
+    height: 16,
+    tintColor: '#666',
+    marginRight: 8,
+  },
+  infoText: {
+    fontSize: 14,
+    color: '#333',
+  },
+  dateContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  dateText: {
+    fontSize: 14,
+    color: '#666',
   },
   emptyListContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
+    padding: 24,
   },
-  emptyListContentContainer: {
-    flexGrow: 1,
+  emptyStateIcon: {
+    width: 64,
+    height: 64,
+    tintColor: '#666',
+    marginBottom: 16,
   },
   noDataText: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#666',
+    color: '#333',
     marginBottom: 8,
   },
   noDataSubText: {
     fontSize: 14,
-    color: '#999',
+    color: '#666',
     textAlign: 'center',
   },
- 
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    marginTop: 12,
+    fontSize: 16,
+    color: '#666',
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 24,
+  },
+  errorText: {
+    fontSize: 16,
+    color: '#d32f2f',
+    textAlign: 'center',
+  },
+  emptyListContentContainer: {
+    flexGrow: 1,
+  },
 });
- 

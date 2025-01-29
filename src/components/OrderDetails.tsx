@@ -1,5 +1,5 @@
-import { Dimensions, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { ApiUrlConstance, errorMessage, methods } from "../constance/constance";
+import { SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { ApiUrlConstance, errorMessage, methods, STATUS_MAP, statusContainerStyles, statusStyles } from "../constance/constance";
 import { useEffect, useState } from "react";
 import { twelveHoursFormat } from "../hooks/helpers";
 
@@ -27,164 +27,263 @@ export default function OrderDetails({ route }: any) {
       }
     } catch (error) {
       setError(errorMessage?.catch_error);
-      console.error("Error fetching order details:", error);
+      console.error('Error fetching order details:', error);
     }
   };
 
   useEffect(() => {
     getOrderIdDetails(route.params.id);
   }, [route]);
-
+  
   if (error) {
     return (
       <SafeAreaView style={styles.errorContainer}>
         <Text style={styles.errorMsgText}>{error}</Text>
+        <TouchableOpacity 
+          style={styles.retryButton}
+          onPress={() => getOrderIdDetails(route.params.id)}
+        >
+          <Text style={styles.retryText}>Retry</Text>
+        </TouchableOpacity>
       </SafeAreaView>
     );
   }
 
+  const orderData = viewOrderDetails[0];
+  {orderData?.CartItems.map((item: any, index: number) =>{
+  console.log(item.quantity);
+  
+  })}
   return (
-    <View style={styles.container}>
-      <View style={styles.card}>
-        <Text style={styles.title}>Order Details #{viewOrderDetails[0]?.id}</Text>
-        <View style={styles.separator} />
-
-        <Text style={styles.sectionTitle}>Customer Information</Text>
-        <View style={styles.infoRow}>
-          <Text style={styles.label}>Name:</Text>
-          <Text style={styles.value}>{viewOrderDetails?.[0]?.customer_details?.name}</Text>
-        </View>
-        <View style={styles.infoRow}>
-          <Text style={styles.label}>Email:</Text>
-          <Text style={styles.value}>{viewOrderDetails?.[0]?.customer_details?.email}</Text>
-        </View>
-        <View style={styles.infoRow}>
-          <Text style={styles.label}>Phone:</Text>
-          <Text style={styles.value}>{viewOrderDetails?.[0]?.customer_details?.mobile_no}</Text>
+    <SafeAreaView style={styles.container}>
+      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+        <View style={styles.header}>
+          <Text style={styles.orderId}>Order #{orderData?.id}</Text>
+           <View style={[statusContainerStyles[orderData?.status], styles. orderStatusBadge]}>
+                      <Text style={statusStyles[orderData?.status]}>
+                        {STATUS_MAP?.[orderData?.status]?.label}
+                      </Text>
+                    </View>
         </View>
 
-        <Text style={styles.sectionTitle}>Order Items</Text>
-        {viewOrderDetails?.[0]?.CartItems.map((cartItem: any, index: number) => (
-          <View key={index} style={styles.orderItemRow}>
-            <Text style={styles.orderItemName}>{cartItem?.display_name} x {cartItem?.quantity}</Text>
-            <Text style={styles.orderItemPrice}>${cartItem?.price}</Text>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Order Items</Text>
+          <View style={styles.card}>
+            {orderData?.CartItems.map((item: any, index: number) => (             
+              <View key={index} style={[
+                styles.orderItem,
+                index !== orderData.CartItems.length - 1 && styles.orderItemBorder
+              ]}>
+                <View style={styles.orderItemHeader}>
+                  <Text style={styles.orderItemName}>{item.display_name}</Text>
+                  <Text style={styles.orderItemPrice}>${item.price}</Text>
+                </View>
+                <View style={styles.orderItemDetails}>
+                <Text style={styles.orderItemQuantity}>Quantity: {Math.round(item.quantity)}</Text>
+                <Text style={styles.orderItemTotal}>
+                    Total: ${(item.price * item.quantity).toFixed(2)}
+                  </Text>
+                </View>
+              </View>
+            ))}
           </View>
-        ))}
+        </View>
 
-        <View style={styles.separator} />
-        <Text style={styles.sectionTitle}>Order Summary</Text>
-        <View style={styles.infoRow}>
-          <Text style={styles.label}>Subtotal:</Text>
-          <Text style={styles.value}>${viewOrderDetails?.[0]?.sub_total}</Text>
-        </View>
-        <View style={styles.infoRow}>
-          <Text style={styles.label}>Tax:</Text>
-          <Text style={styles.value}>${viewOrderDetails?.[0]?.tax}</Text>
-        </View>
-        {viewOrderDetails[0]?.delivery_fee && (
-          <View style={styles.infoRow}>
-            <Text style={styles.label}>Delivery Fee:</Text>
-            <Text style={styles.value}>${viewOrderDetails?.[0]?.delivery_fee}</Text>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Order Summary</Text>
+          <View style={styles.card}>
+            <View style={styles.summaryItem}>
+              <Text style={styles.summaryLabel}>Subtotal</Text>
+              <Text style={styles.summaryValue}>${orderData?.sub_total}</Text>
+            </View>
+            <View style={styles.summaryItem}>
+              <Text style={styles.summaryLabel}>Tax</Text>
+              <Text style={styles.summaryValue}>${orderData?.tax}</Text>
+            </View>
+            {orderData?.delivery_fee > 0 && (
+              <View style={styles.summaryItem}>
+                <Text style={styles.summaryLabel}>Delivery Fee</Text>
+                <Text style={styles.summaryValue}>${orderData?.delivery_fee}</Text>
+              </View>
+            )}
+            <View style={styles.separator} />
+            <View style={styles.totalItem}>
+              <Text style={styles.totalLabel}>Total</Text>
+              <Text style={styles.totalValue}>${orderData?.total}</Text>
+            </View>
           </View>
-        )}
-        <View style={styles.totalRow}>
-          <Text style={styles.totalLabel}>Total:</Text>
-          <Text style={styles.totalValue}>${viewOrderDetails?.[0]?.total}</Text>
         </View>
-      </View>
-    </View>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Customer Information</Text>
+          <View style={styles.card}>
+            <View style={styles.customerInfo}>
+              <Text style={styles.customerName}>{orderData?.customer_details?.name}</Text>
+              <Text style={styles.customerDetail}>{orderData?.customer_details?.email}</Text>
+              <Text style={styles.customerDetail}>{orderData?.customer_details?.mobile_no}</Text>
+            </View>
+          </View>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f5f7fa",
-    justifyContent: "center",
-    alignItems: "center",
+    backgroundColor: "#F5F5F7",
   },
-  card: {
-    backgroundColor: "#fff",
-    borderRadius: 12,
-    padding: 20,
-    width: "90%",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
-    elevation: 5,
+  scrollView: {
+    flex: 1,
   },
-  title: {
-    fontSize: 22,
-    fontWeight: "bold",
-    color: "#333",
-    textAlign: "center",
-    marginBottom: 10,
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 16,
+    backgroundColor: '#fff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E5EA',
   },
-  separator: {
-    height: 1,
-    backgroundColor: "#ddd",
-    marginVertical: 10,
+  orderId: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#000',
+  },
+  orderStatusBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 8,
+  },
+  orderStatusText: {
+    color: '#2E7D32',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  section: {
+    padding: 16,
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: "bold",
-    color: "#555",
-    marginTop: 15,
+    fontWeight: '600',
+    color: '#1C1C1E',
+    marginBottom: 12,
   },
-  infoRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginVertical: 5,
+  card: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 3,
   },
-  label: {
+  customerInfo: {
+    gap: 4,
+  },
+  customerName: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#000',
+    marginBottom: 4,
+  },
+  customerDetail: {
     fontSize: 16,
-    color: "#777",
+    color: '#666',
+    lineHeight: 22,
   },
-  value: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#333",
+  orderItem: {
+    paddingVertical: 12,
   },
-  orderItemRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginVertical: 5,
+  orderItemBorder: {
+    borderBottomWidth: 1,
+    borderBottomColor: '#F2F2F7',
+  },
+  orderItemHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
   },
   orderItemName: {
     fontSize: 16,
-    color: "#333",
+    fontWeight: '600',
+    color: '#000',
+    flex: 1,
   },
   orderItemPrice: {
     fontSize: 16,
-    fontWeight: "600",
-    color: "#2c3e50",
+    fontWeight: '600',
+    color: '#000',
   },
-  totalRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginTop: 10,
+  orderItemDetails: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  orderItemQuantity: {
+    fontSize: 14,
+    color: '#666',
+  },
+  orderItemTotal: {
+    fontSize: 14,
+    color: '#666',
+  },
+  summaryItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 12,
+  },
+  summaryLabel: {
+    fontSize: 16,
+    color: '#666',
+  },
+  summaryValue: {
+    fontSize: 16,
+    color: '#000',
+  },
+  separator: {
+    height: 1,
+    backgroundColor: '#E5E5EA',
+    marginVertical: 12,
+  },
+  totalItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   totalLabel: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#222",
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#000',
   },
   totalValue: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#e74c3c",
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#007AFF',
   },
   errorContainer: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#ffefef",
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 24,
+    backgroundColor: '#FFF',
   },
   errorMsgText: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "#e74c3c",
-    textAlign: "center",
+    fontSize: 17,
+    color: '#FF3B30',
+    textAlign: 'center',
+    marginBottom: 16,
+  },
+  retryButton: {
+    backgroundColor: '#007AFF',
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 8,
+  },
+  retryText: {
+    fontSize: 17,
+    fontWeight: '600',
+    color: '#fff',
   },
 });
