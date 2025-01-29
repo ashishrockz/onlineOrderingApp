@@ -1,5 +1,6 @@
 import {
   Alert,
+  Image,
   Modal,
   Pressable,
   StyleSheet,
@@ -28,6 +29,11 @@ const ForgotPassword = () => {
       >
         <View style={styles.centeredView}>
           <View style={styles.modalView}>
+          <TouchableOpacity style={{alignSelf:"flex-end"}} onPress={() => setForgotPasswordModal(false)}>
+      <Image source={{
+              uri:"https://png.pngtree.com/png-vector/20190603/ourmid/pngtree-icon-close-button-png-image_1357822.jpg"
+            }} style={{height:30,width:30}}></Image>
+      </TouchableOpacity>
             <Text style={styles.modalText}>Forgot Password</Text>
             <View style={styles.inputGroup}>
               <Text style={styles.label}>Email</Text>
@@ -39,13 +45,8 @@ const ForgotPassword = () => {
               />
             </View>
             <View style={styles.buttonContainer}>
-              <TouchableOpacity
-                style={[styles.button, styles.buttonClose]}
-                onPress={() => setForgotPasswordModal(false)}>
-                <Text style={styles.textStyle}>Close</Text>
-              </TouchableOpacity>
               <TouchableOpacity style={[styles.button, styles.buttonSend]}>
-                <Text style={styles.textStyle}>Send</Text>
+                <Text style={styles.textStyle}>Reset Password</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -94,7 +95,7 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: "space-around",
     marginTop: 20,
     width: '100%',
   },
@@ -109,7 +110,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#d9534f',
   },
   buttonSend: {
-    backgroundColor: '#0054a5',
+    backgroundColor: '#ff5733',
   },
   textStyle: {
     color: 'white',

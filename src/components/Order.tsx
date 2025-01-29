@@ -139,12 +139,21 @@ const Orders = () => {
           />
         </MenuView>
       </View>
-      
       <View style={styles.cardContent}>
         <View style={styles.customerInfo}>
-          <Text style={styles.customerName}>{order.Name}</Text>
-          <Text style={styles.emailText}>{order.email}</Text>
-          <Text style={styles.mobilenoText}>{order.mobile_no}</Text>
+        <Text style={styles.customerName}>{order.Name}</Text>
+         <View style={{flexDirection:"row",alignItems:"center"}}>
+          <Image source={{
+              uri:"https://cdn-icons-png.flaticon.com/512/646/646094.png"
+            }} style={styles.iconsImage}></Image>
+            <Text style={styles.emailText}>{order.email}</Text>
+         </View>
+         <View style={{flexDirection:"row",alignItems:"center"}}>
+          <Image source={{
+              uri:"https://png.pngtree.com/png-clipart/20191120/original/pngtree-phone-icon-png-image_5065646.jpg"
+            }} style={styles.iconsImage}></Image>
+            <Text style={styles.mobilenoText}>{order.mobile_no}</Text>
+         </View>
 
         </View>
         
@@ -364,7 +373,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: 16,
-    borderBottomWidth: 1,
+    borderBottomWidth: 2,
     borderBottomColor: '#F2F2F7',
   },
   orderIdContainer: {
@@ -388,8 +397,11 @@ const styles = StyleSheet.create({
     tintColor: '#666',
   },
   cardContent: {
-    padding: 16,
-    gap:16
+    paddingLeft: 16,
+    paddingRight:16,
+    paddingBottom:16,
+    gap:16,
+    paddingTop:10
   },
   customerInfo: {
     gap: 4,
@@ -468,6 +480,11 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#fff',
   },
+  iconsImage:{
+    height:18,
+    width:18,
+    marginRight:8,
+  }
 });
 
 export default Orders;
