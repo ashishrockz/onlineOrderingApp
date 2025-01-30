@@ -29,7 +29,7 @@ import {
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {useNavigation} from '@react-navigation/native';
 import {twelveHoursFormat, formatDate} from '../hooks/helpers';
-
+import { io } from 'socket.io-client';
 type RootStackParamList = {
   RecentOrdersOfUsers: {name: string};
   viewOrder: {id: number};
@@ -81,6 +81,21 @@ const Orders = () => {
     }
     setIsRefreshing(false);
   }, []);
+
+  useEffect(()=>{
+    const socket = io("url");
+    socket.on('connect', () => {
+      console.log('Connected to the io server');
+    });
+ 
+    socket.on('disconnect', (reason) => {
+      console.log('Reason for disconnect is :', reason);
+    });
+
+    socket.on("word",(data)=>{
+      console.log(data)
+    })
+  },[])
 
   useEffect(() => {
     const fetchData = async () => {
