@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   SafeAreaView,
   StyleSheet,
@@ -10,6 +10,7 @@ import {
   FlatList,
   Image,
   ActivityIndicator,
+  RefreshControl,
 } from 'react-native';
 import { PromotionsData } from '../types/type';
 import { ApiUrlConstance, errorMessage, methods } from '../constance/constance';
@@ -20,6 +21,7 @@ const Promotions = () => {
   const [promotionData, setPromotionData] = useState([]);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   const getPromotionsDetails = async () => {
     try {
@@ -48,6 +50,12 @@ const Promotions = () => {
     }
   };
 
+  const onRefresh = useCallback(async () => {
+    setIsRefreshing(true);
+    await getPromotionsDetails();
+    setIsRefreshing(false);
+  }, [getPromotionsDetails]);
+
   useEffect(() => {
     getPromotionsDetails();
   }, []);
@@ -66,7 +74,7 @@ const Promotions = () => {
   }, [inputFilter, promotionData]);
 
   const renderCard = ({ item }: { item: PromotionsData }) => (
-    <View style={styles.card}>
+    <View style={styles.card} >
       <View style={styles.cardHeader}>
         <View style={styles.nameContainer}>
           <Text style={styles.cardName}>{item?.name}</Text>
@@ -165,17 +173,20 @@ const Promotions = () => {
           <Text style={styles.errorText}>{error}</Text>
         </View>
       ) : (
-        <FlatList
-          data={filteredData}
-          keyExtractor={(_item, index) => index.toString()}
-          renderItem={renderCard}
-          contentContainerStyle={[
-            styles.listContainer,
-            filteredData.length === 0 && styles.emptyListContentContainer,
-          ]}
-          ListEmptyComponent={EmptyListMessage}
-          showsVerticalScrollIndicator={false}
-        />
+            <FlatList
+              data={filteredData}
+              keyExtractor={(_item, index) => index.toString()}
+              renderItem={renderCard}
+              contentContainerStyle={[
+                styles.listContainer,
+                filteredData.length === 0 && styles.emptyListContentContainer,
+              ]}
+              ListEmptyComponent={EmptyListMessage}
+              showsVerticalScrollIndicator={false}
+              refreshControl={
+                <RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />
+              }
+            />
       )}
     </SafeAreaView>
   );

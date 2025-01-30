@@ -8,7 +8,16 @@ export const statusOptions: StatusOption[] = [
   { label: "Cancelled", value: "5" },
   { label: "Refunded", value: "6" },
 ];
+export  const moreActionsForPaid = [
+  {id: 'View Order', title: 'View Order', titleColor: '#007AFF'},
+  {id: 'Mark as completed', title: 'Mark as complete', titleColor: '#007AFF'},
+  {id: 'Cancel order', title: 'Cancel Order', titleColor: 'red'},
+]
 
+export const moreActionsForOther = [
+  {id: 'View Order', title: 'View Order', titleColor: '#007AFF'},
+]
+ 
 export const statusContainerStylesForRecentOrders: StatusContainerStyles = {
   Refunded: {
     backgroundColor: "#FFFDE7", 

@@ -25,11 +25,14 @@ import {
   errorMessage,
   methods,
   statusmode,
+  moreActionsForPaid,
+  moreActionsForOther,
 } from '../constance/constance';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {useNavigation} from '@react-navigation/native';
 import {twelveHoursFormat, formatDate} from '../hooks/helpers';
 import { io } from 'socket.io-client';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 type RootStackParamList = {
   RecentOrdersOfUsers: {name: string};
   "View Order Details": {id: number};
@@ -48,19 +51,21 @@ const Orders = () => {
   const [statusFilter, setStatusFilter] = useState<string>(statusmode?.all);
 
   const getOrderDetails = async () => {
+    const token = await AsyncStorage.getItem('userToken');
     try {
       const response = await fetch(
-        `${ApiUrlConstance?.chefgaApiUrl}/${ApiUrlConstance?.order}`,
+        `${ApiUrlConstance?.apiUrl}/${ApiUrlConstance?.order}`,
         {
           method: methods?.get,
           headers: {
-            Authorization: `${ApiUrlConstance?.bearer} eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7Il9pZCI6MX0sImlhdCI6MTczODEyNTg4Mn0.CPD_pjsl__yHgZBNNAoEG6xMhQyb6cSZ41LQHyLH9s8`,
+            Authorization: `${ApiUrlConstance?.bearer} ${token}`,
             outlet: ApiUrlConstance?.secondOutlet,
           },
         },
       );
       if (response?.ok) {
         const responseData = await response.json();
+        console.log(responseData);
         return responseData?.data;
       } else {
         const responseData = await response.json();
@@ -71,16 +76,6 @@ const Orders = () => {
       console.error('Error fetching order details:', error);
     }
   };
-
-  const onRefresh = React.useCallback(async () => {
-    setIsRefreshing(true);
-    const fetchedData = await getOrderDetails();
-    if (fetchedData) {
-      setOrderList(fetchedData);
-      setFilteredOrders(fetchedData);
-    }
-    setIsRefreshing(false);
-  }, []);
 
   useEffect(()=>{
     const socket = io("url");
@@ -95,7 +90,17 @@ const Orders = () => {
     socket.on("word",(data)=>{
       console.log(data)
     })
-  },[])
+  },[]);
+
+  const onRefresh = React.useCallback(async () => {
+    setIsRefreshing(true);
+    const fetchedData = await getOrderDetails();
+    if (fetchedData) {
+      setOrderList(fetchedData);
+      setFilteredOrders(fetchedData);
+    }
+    setIsRefreshing(false);
+  }, [getOrderDetails]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -141,9 +146,7 @@ const Orders = () => {
               navigation.navigate("View Order Details", {id: order.id});
             } 
           }}
-          actions={[
-            {id: 'View Order', title: 'View Order'},
-          ]}
+          actions={ order.status == 2 ?moreActionsForPaid : moreActionsForOther}
           shouldOpenOnLongPress={false}>
           <Image
             source={{uri: 'https://cdn-icons-png.flaticon.com/512/7066/7066144.png'}}
