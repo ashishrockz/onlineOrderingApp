@@ -32,7 +32,7 @@ import {twelveHoursFormat, formatDate} from '../hooks/helpers';
 import { io } from 'socket.io-client';
 type RootStackParamList = {
   RecentOrdersOfUsers: {name: string};
-  viewOrder: {id: number};
+  "View Order Details": {id: number};
 };
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'RecentOrdersOfUsers'>;
@@ -138,14 +138,11 @@ const Orders = () => {
         <MenuView
           onPressAction={({nativeEvent}) => {
             if (nativeEvent.event === 'View Order') {
-              navigation.navigate("viewOrder", {id: order.id});
-            } else if (nativeEvent.event === 'Recent orders') {
-              navigation.navigate('RecentOrdersOfUsers', {name: order.Name});
-            }
+              navigation.navigate("View Order Details", {id: order.id});
+            } 
           }}
           actions={[
-            {id: 'View Order', title: 'View Order', titleColor: '#007AFF'},
-            {id: 'Recent orders', title: 'Recent Orders', titleColor: '#007AFF'},
+            {id: 'View Order', title: 'View Order'},
           ]}
           shouldOpenOnLongPress={false}>
           <Image
@@ -157,13 +154,13 @@ const Orders = () => {
       <View style={styles.cardContent}>
         <View style={styles.customerInfo}>
         <Text style={styles.customerName}>{order.Name}</Text>
-         <View style={{flexDirection:"row",alignItems:"center"}}>
+         <View style={styles.cousterminfoicons}>
           <Image source={{
               uri:"https://img.icons8.com/ios/50/mail.png"
             }} style={styles.iconsImage}></Image>
             <Text style={styles.emailText}>{order.email}</Text>
          </View>
-         <View style={{flexDirection:"row",alignItems:"center"}}>
+         <View style={styles.cousterminfoicons}>
           <Image source={{
               uri:"https://img.icons8.com/ios/50/phone.png"
             }} style={styles.iconsImage}></Image>
@@ -343,7 +340,6 @@ const styles = StyleSheet.create({
   },
   filterLabel:{
     fontSize:16,
-    fontWeight:'500',
     paddingLeft:6
   },
   dropdown: {
@@ -434,12 +430,15 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: '#666',
   },
+  cousterminfoicons:{
+    flexDirection: 'row',
+    alignItems: 'center'
+  },
   orderDetails: {
     gap: 8,
   },
   detailRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
   },
   detailLabel: {
@@ -448,12 +447,15 @@ const styles = StyleSheet.create({
   },
   detailValue: {
     fontSize: 15,
+    marginLeft:5,
     color: '#000',
   },
   amount: {
     fontSize: 17,
     fontWeight: '600',
     color: '#3b3b3b',
+    marginLeft:5,
+
   },
   loadingContainer: {
     flex: 1,

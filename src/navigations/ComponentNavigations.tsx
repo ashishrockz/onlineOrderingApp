@@ -12,7 +12,7 @@ const ComponentNavigations = () => {
       <Stack.Navigator initialRouteName='Home'>
         <Stack.Screen name="Home" component={Index} options={{headerShown:false}}/>
         {/* <Stack.Screen name="RecentOrdersOfUsers" component={RecentOrdersOfUsers} /> */}
-        <Stack.Screen name="viewOrder" component={OrderDetails} />
+        <Stack.Screen name="View Order Details" component={OrderDetails} />
       </Stack.Navigator>
     </NavigationContainer>
   )

@@ -40,6 +40,8 @@ const styles = StyleSheet.create({
     height: 80,
   },
   logoutImage:{
+    width:25,
+    height:25,
     marginRight:8,
     tintColor:"orange"
   }

@@ -1,9 +1,24 @@
-import { Image, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { ApiUrlConstance, errorMessage, methods, STATUS_MAP, statusContainerStyles, statusStyles } from "../constance/constance";
-import { useEffect, useState } from "react";
-import { twelveHoursFormat } from "../hooks/helpers";
+import {
+  Image,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import {
+  ApiUrlConstance,
+  errorMessage,
+  methods,
+  STATUS_MAP,
+  statusContainerStyles,
+  statusStyles,
+} from '../constance/constance';
+import {useEffect, useState} from 'react';
+import {twelveHoursFormat} from '../hooks/helpers';
 
-export default function OrderDetails({ route }: any) {
+export default function OrderDetails({route}: any) {
   const [viewOrderDetails, setViewOrderDetails] = useState<any[]>([]);
   const [error, setError] = useState<string | null>(null);
 
@@ -34,15 +49,14 @@ export default function OrderDetails({ route }: any) {
   useEffect(() => {
     getOrderIdDetails(route.params.id);
   }, [route]);
-  
+
   if (error) {
     return (
       <SafeAreaView style={styles.errorContainer}>
         <Text style={styles.errorMsgText}>{error}</Text>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.retryButton}
-          onPress={() => getOrderIdDetails(route.params.id)}
-        >
+          onPress={() => getOrderIdDetails(route.params.id)}>
           <Text style={styles.retryText}>Retry</Text>
         </TouchableOpacity>
       </SafeAreaView>
@@ -50,37 +64,49 @@ export default function OrderDetails({ route }: any) {
   }
 
   const orderData = viewOrderDetails[0];
-  {orderData?.CartItems.map((item: any, index: number) =>{
-  console.log(item.quantity);
-  
-  })}
+  {
+    orderData?.CartItems.map((item: any, index: number) => {
+      console.log(item.quantity);
+    });
+  }
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        style={styles.scrollView}
+        showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
           <Text style={styles.orderId}>Order #{orderData?.id}</Text>
-           <View style={[statusContainerStyles[orderData?.status], styles. orderStatusBadge]}>
-                      <Text style={statusStyles[orderData?.status]}>
-                        {STATUS_MAP?.[orderData?.status]?.label}
-                      </Text>
-                    </View>
+          <View
+            style={[
+              statusContainerStyles[orderData?.status],
+              styles.orderStatusBadge,
+            ]}>
+            <Text style={statusStyles[orderData?.status]}>
+              {STATUS_MAP?.[orderData?.status]?.label}
+            </Text>
+          </View>
         </View>
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Order Items</Text>
           <View style={styles.card}>
-            {orderData?.CartItems.map((item: any, index: number) => (             
-              <View key={index} style={[
-                styles.orderItem,
-                index !== orderData.CartItems.length - 1 && styles.orderItemBorder
-              ]}>
+            {orderData?.CartItems.map((item: any, index: number) => (
+              <View
+                key={index}
+                style={[
+                  styles.orderItem,
+                  index !== orderData.CartItems.length - 1 &&
+                    styles.orderItemBorder,
+                ]}>
                 <View style={styles.orderItemHeader}>
                   <Text style={styles.orderItemName}>{item.display_name}</Text>
                   <Text style={styles.orderItemPrice}>${item.price}</Text>
                 </View>
                 <View style={styles.orderItemDetails}>
-                <Text style={styles.orderItemQuantity}>Quantity: {Math.round(item.quantity)}</Text>
-                <Text style={styles.orderItemTotal}>
+                  <Text style={styles.orderItemQuantity}>
+                    Quantity: {Math.round(item.quantity)}
+                  </Text>
+                  <Text style={styles.orderItemTotal}>
                     Total: ${(item.price * item.quantity).toFixed(2)}
                   </Text>
                 </View>
@@ -103,7 +129,9 @@ export default function OrderDetails({ route }: any) {
             {orderData?.delivery_fee > 0 && (
               <View style={styles.summaryItem}>
                 <Text style={styles.summaryLabel}>Delivery Fee</Text>
-                <Text style={styles.summaryValue}>${orderData?.delivery_fee}</Text>
+                <Text style={styles.summaryValue}>
+                  ${orderData?.delivery_fee}
+                </Text>
               </View>
             )}
             <View style={styles.separator} />
@@ -117,14 +145,29 @@ export default function OrderDetails({ route }: any) {
           <Text style={styles.sectionTitle}>Customer Information</Text>
           <View style={styles.card}>
             <View style={styles.customerInfo}>
-              <Text style={styles.customerName}>{orderData?.customer_details?.name}</Text>
-              <View style={{flexDirection:"row",alignItems:"center"}}>
-                        <Image source={{
-                            uri:"https://img.icons8.com/ios/50/mail.png"
-                          }} style={styles.iconsImage}></Image>
-                          <Text style={styles.customerDetail}>{orderData?.customer_details?.email}</Text>
-                       </View>
-              <Text style={styles.customerDetail}>{orderData?.customer_details?.mobile_no}</Text>
+              <Text style={styles.customerName}>
+                {orderData?.customer_details?.name}
+              </Text>
+              <View style={styles.cousterminfoicons}>
+                <Image
+                  source={{
+                    uri: 'https://img.icons8.com/ios/50/mail.png',
+                  }}
+                  style={styles.iconsImage}></Image>
+                <Text style={styles.customerDetail}>
+                  {orderData?.customer_details?.email}
+                </Text>
+              </View>
+              <View style={styles.cousterminfoicons}>
+                <Image
+                  source={{
+                    uri: 'https://img.icons8.com/ios/50/phone.png',
+                  }}
+                  style={styles.iconsImage}></Image>
+                <Text style={styles.customerDetail}>
+                  {orderData?.customer_details?.mobile_no}
+                </Text>
+              </View>
             </View>
           </View>
         </View>
@@ -136,16 +179,16 @@ export default function OrderDetails({ route }: any) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F5F5F7",
+    backgroundColor: '#F5F5F7',
   },
   scrollView: {
     flex: 1,
   },
-  iconsImage:{
-    height:18,
-    width:18,
-    marginRight:8,
-    tintColor:'blue'
+  iconsImage: {
+    height: 18,
+    width: 18,
+    marginRight: 8,
+    tintColor: 'blue',
   },
   header: {
     flexDirection: 'row',
@@ -185,7 +228,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 16,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.05,
     shadowRadius: 8,
     elevation: 3,
@@ -198,6 +241,10 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#000',
     marginBottom: 4,
+  },
+  cousterminfoicons:{
+    flexDirection: 'row', 
+    alignItems: 'center',
   },
   customerDetail: {
     fontSize: 16,
