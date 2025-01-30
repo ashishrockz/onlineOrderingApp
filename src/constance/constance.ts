@@ -205,6 +205,8 @@ export const ApiUrlConstance: { [key: string]: string } = {
   secondOutlet:'70',
   dummyDataApi:'http://10.0.2.2:8000/dummyData',
   bearer:'Bearer',
+  cancel:"cancel",
+  complete:"complete"
 };
  export const methods={
   get:"GET",

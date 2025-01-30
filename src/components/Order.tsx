@@ -53,12 +53,12 @@ const Orders = () => {
   const getOrderDetails = async () => {
     try {
       const response = await fetch(
-        `${ApiUrlConstance?.chefgaApiUrl}/${ApiUrlConstance?.order}`,
+        `${ApiUrlConstance?.apiUrl}/${ApiUrlConstance?.order}`,
         {
           method: methods?.get,
           headers: {
-            Authorization: `${ApiUrlConstance?.bearer} eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7Il9pZCI6MX0sImlhdCI6MTczODEyNTg4Mn0.CPD_pjsl__yHgZBNNAoEG6xMhQyb6cSZ41LQHyLH9s8`,
-            outlet: ApiUrlConstance?.secondOutlet,
+            Authorization: `${ApiUrlConstance?.bearer} eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7Il9pZCI6MX0sImlhdCI6MTczODEzNDM2Mn0.tWolUUPvQ1gyAi9c060NqtQ9Qqjqd02xLaSYM3al-yU`,
+            outlet: "12",
           },
         },
       );
@@ -75,8 +75,12 @@ const Orders = () => {
     }
   };
 
+  // const cancleOrder = () =>{
+     
+  // }
+
   useEffect(()=>{
-    const socket = io("url");
+    const socket = io("http://10.0.12.113:9001");
     socket.on('connect', () => {
       console.log('Connected to the io server');
     });
@@ -85,7 +89,7 @@ const Orders = () => {
       console.log('Reason for disconnect is :', reason);
     });
 
-    socket.on("word",(data)=>{
+    socket.on("order_details_12",(data)=>{
       console.log(data)
     })
   },[]);
@@ -144,10 +148,7 @@ const Orders = () => {
               navigation.navigate("View Order Details", {id: order.id});
             } 
           }}
-          actions={[
-            {id: 'View Order', title: 'View Order', titleColor: '#007AFF'},
-            {id: 'Recent orders', title: 'Recent Orders', titleColor: '#007AFF'},
-          ]}
+          actions={ order.status == 2 ? moreActionsForPaid : moreActionsForOther}
           shouldOpenOnLongPress={false}>
           <Image
             source={{uri: 'https://cdn-icons-png.flaticon.com/512/7066/7066144.png'}}
