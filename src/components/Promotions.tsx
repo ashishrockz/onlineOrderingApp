@@ -54,7 +54,7 @@ const Promotions = () => {
     setIsRefreshing(true);
     await getPromotionsDetails();
     setIsRefreshing(false);
-  }, [getPromotionsDetails]);
+  }, []);
 
   useEffect(() => {
     getPromotionsDetails();

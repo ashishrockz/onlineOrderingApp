@@ -51,21 +51,19 @@ const Orders = () => {
   const [statusFilter, setStatusFilter] = useState<string>(statusmode?.all);
 
   const getOrderDetails = async () => {
-    const token = await AsyncStorage.getItem('userToken');
     try {
       const response = await fetch(
-        `${ApiUrlConstance?.apiUrl}/${ApiUrlConstance?.order}`,
+        `${ApiUrlConstance?.chefgaApiUrl}/${ApiUrlConstance?.order}`,
         {
           method: methods?.get,
           headers: {
-            Authorization: `${ApiUrlConstance?.bearer} ${token}`,
+            Authorization: `${ApiUrlConstance?.bearer} eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7Il9pZCI6MX0sImlhdCI6MTczODEyNTg4Mn0.CPD_pjsl__yHgZBNNAoEG6xMhQyb6cSZ41LQHyLH9s8`,
             outlet: ApiUrlConstance?.secondOutlet,
           },
         },
       );
       if (response?.ok) {
         const responseData = await response.json();
-        console.log(responseData);
         return responseData?.data;
       } else {
         const responseData = await response.json();
@@ -146,7 +144,10 @@ const Orders = () => {
               navigation.navigate("View Order Details", {id: order.id});
             } 
           }}
-          actions={ order.status == 2 ?moreActionsForPaid : moreActionsForOther}
+          actions={[
+            {id: 'View Order', title: 'View Order', titleColor: '#007AFF'},
+            {id: 'Recent orders', title: 'Recent Orders', titleColor: '#007AFF'},
+          ]}
           shouldOpenOnLongPress={false}>
           <Image
             source={{uri: 'https://cdn-icons-png.flaticon.com/512/7066/7066144.png'}}
