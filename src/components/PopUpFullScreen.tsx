@@ -1,7 +1,18 @@
 import { Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import React from 'react';
+import React, { useEffect } from 'react';
+import SoundPlayer from 'react-native-sound-player';
 
 const PopUpFullScreen = ({ visible, onClose, title, message, number = "1" }: any) => {
+  useEffect(() => {
+    if (visible) {
+      try {
+        SoundPlayer.playAsset(require('../assets/notification.mp3'))
+      } catch (error) {
+        console.log('Error playing sound:', error);
+      }
+    }
+  }, [visible]);
+
   return (
     <Modal
       animationType="fade"

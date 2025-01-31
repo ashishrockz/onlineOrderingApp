@@ -197,7 +197,7 @@ export default Promotions;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#F2F2F7',
   },
   header: {
     flexDirection:'row',
@@ -214,10 +214,10 @@ const styles = StyleSheet.create({
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#F2F2F7',
     borderRadius: 12,
     paddingHorizontal: 12,
-    height: 48,
+    height: 50,
   },
   searchIcon: {
     width: 20,
