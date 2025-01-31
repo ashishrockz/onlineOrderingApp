@@ -7,20 +7,48 @@ import {
   View,
 } from 'react-native';
 import React from 'react';
+import {ApiUrlConstance, methods} from '../constance/constance';
+import {orderType} from '../types/type';
 
 interface CancelOrderProps {
   visible: boolean;
   onClose: () => void;
   orderId: string;
-  onCancel?: () => void;
+  setOrderList: (orders: orderType[]) => void;
+  getOrderDetails: () => Promise<orderType[]>;
+  setCancelOrderModel: (a:boolean) => void;
 }
 
 const CancelOrder: React.FC<CancelOrderProps> = ({
   visible,
   onClose,
   orderId,
-  onCancel,
+  setOrderList,
+  getOrderDetails,
+  setCancelOrderModel
 }) => {
+  const onCancel = async () => {
+    try {
+      const response = await fetch(
+        `${ApiUrlConstance?.apiUrl}/${ApiUrlConstance?.order}/${orderId}/${ApiUrlConstance?.cancel}`,
+        {
+          method: methods?.get,
+          headers: {
+            Authorization: `${ApiUrlConstance?.bearer} eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7Il9pZCI6MX0sImlhdCI6MTczODMwODI1NH0.MBkDmIVd5M6fwMNF-A2ouEx9wNfJ-BRowzQjnMtat88`,
+            outlet: ApiUrlConstance?.firstOutlet,
+          },
+        },
+      );
+      console.log(1);
+      
+      if (response?.ok) {
+        const responseData = await getOrderDetails();
+        setOrderList(responseData);
+        setCancelOrderModel(false)
+        console.log(2);
+      }
+    } catch {}
+  };
   return (
     <Modal
       animationType="fade"
@@ -62,7 +90,9 @@ const CancelOrder: React.FC<CancelOrderProps> = ({
               <Text style={styles.cancelButtonText}>Cancel</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={[styles.button, styles.cancelOrderButton]}>
+            <TouchableOpacity
+              style={[styles.button, styles.cancelOrderButton]}
+              onPress={()=>onCancel()}>
               <Text style={styles.cancelOrderButtonText}>Cancel Order</Text>
             </TouchableOpacity>
           </View>

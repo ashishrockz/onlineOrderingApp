@@ -7,20 +7,49 @@ import {
   View,
 } from 'react-native';
 import React from 'react';
+import {ApiUrlConstance, methods} from '../constance/constance';
+import { orderType } from '../types/type';
 
 interface CompleteOrderProps {
-  visible: boolean;
-  onClose: () => void;
-  orderId: string;
-  // onComplete: () => void;
-}
+    visible: boolean;
+    onClose: () => void;
+    orderId: string;
+    setOrderList: (orders: orderType[]) => void;  
+    getOrderDetails: () => Promise<orderType[]>; 
+    setCompleteModel:(a:boolean) =>void; 
+  }
 
 const CompleteOrder: React.FC<CompleteOrderProps> = ({
   visible,
   onClose,
   orderId,
-  // onComplete,
+  setOrderList,
+  getOrderDetails,
+  setCompleteModel,
 }) => {
+  const onComplete = async () => {
+    try {
+      const response = await fetch(
+        `${ApiUrlConstance?.apiUrl}/${ApiUrlConstance?.order}/${orderId}/${ApiUrlConstance?.complete}`,
+        {
+          method: methods?.get,
+          headers: {
+            Authorization: `${ApiUrlConstance?.bearer} eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7Il9pZCI6MX0sImlhdCI6MTczODMwODI1NH0.MBkDmIVd5M6fwMNF-A2ouEx9wNfJ-BRowzQjnMtat88`,
+            outlet: ApiUrlConstance?.firstOutlet,
+          },
+        },
+      );
+      console.log(1);
+      
+      if(response?.ok){
+        const responseData = await getOrderDetails()
+        setOrderList(responseData)
+        setCompleteModel(false)
+        console.log(2);
+        
+      }
+    } catch {}
+  };
   return (
     <Modal
       animationType="fade"
@@ -51,7 +80,9 @@ const CompleteOrder: React.FC<CompleteOrderProps> = ({
               <Text style={styles.cancelButtonText}>Cancel</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={[styles.button, styles.completeButton]}>
+            <TouchableOpacity
+              style={[styles.button, styles.completeButton]}
+              onPress={()=>onComplete()}>
               <Text style={styles.completeButtonText}>Complete Order</Text>
             </TouchableOpacity>
           </View>
