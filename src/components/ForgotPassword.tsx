@@ -25,15 +25,18 @@ const ForgotPassword = () => {
         animationType="slide"
         transparent={true}
         visible={forgotPasswordModal}
-        onRequestClose={() => setForgotPasswordModal(false)} 
-      >
+        onRequestClose={() => setForgotPasswordModal(false)}>
         <View style={styles.centeredView}>
           <View style={styles.modalView}>
-          <TouchableOpacity style={{alignSelf:"flex-end"}} onPress={() => setForgotPasswordModal(false)}>
-      <Image source={{
-              uri:"https://png.pngtree.com/png-vector/20190603/ourmid/pngtree-icon-close-button-png-image_1357822.jpg"
-            }} style={{height:30,width:30}}></Image>
-      </TouchableOpacity>
+            <TouchableOpacity
+              style={{alignSelf: 'flex-end'}}
+              onPress={() => setForgotPasswordModal(false)}>
+              <Image
+                source={{
+                  uri: 'https://img.icons8.com/ios/50/delete-sign.png',
+                }}
+                style={{height: 25, width: 25}}></Image>
+            </TouchableOpacity>
             <Text style={styles.modalText}>Forgot Password</Text>
             <View style={styles.inputGroup}>
               <Text style={styles.label}>Email</Text>
@@ -41,7 +44,6 @@ const ForgotPassword = () => {
                 style={styles.textInput}
                 keyboardType="email-address"
                 placeholder="Enter your email"
-               
               />
             </View>
             <View style={styles.buttonContainer}>
@@ -95,7 +97,7 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     flexDirection: 'row',
-    justifyContent: "space-around",
+    justifyContent: 'space-around',
     marginTop: 20,
     width: '100%',
   },
@@ -103,7 +105,7 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     padding: 10,
     elevation: 2,
-    width: '45%',
+    width: '50%',
     alignItems: 'center',
   },
   buttonClose: {
@@ -116,9 +118,10 @@ const styles = StyleSheet.create({
     color: 'white',
     fontWeight: 'bold',
     textAlign: 'center',
+    fontSize:17
   },
   inputGroup: {
-    width:'100%'
+    width: '100%',
   },
   label: {
     fontSize: 16,
@@ -129,9 +132,9 @@ const styles = StyleSheet.create({
   textInput: {
     borderWidth: 1,
     borderColor: '#ddd',
-    borderRadius: 15,
+    borderRadius: 6,
     padding: 20,
-    fontSize: 16,
+    fontSize: 18,
     backgroundColor: '#f9f9f9',
     color: '#333',
   },
