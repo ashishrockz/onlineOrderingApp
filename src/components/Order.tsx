@@ -311,6 +311,9 @@ useEffect(()=>{
           setSelectedOrderId('');
         }}
         orderId={selectedOrderId}
+        setOrderList={setOrderList}
+        getOrderDetails={getOrderDetails}
+        setCompleteModel={setCompleteModel}
       />
       <CancelOrder
         visible={cancelOrderModel}
@@ -318,8 +321,12 @@ useEffect(()=>{
           setCancelOrderModel(false);
           setSelectedOrderId('');
         }}
+        setCancelOrderModel={ setCancelOrderModel}
         orderId={selectedOrderId}
+        setOrderList={setOrderList}
+        getOrderDetails={getOrderDetails}
       />
+has context menu
     </SafeAreaView>
   );
 };

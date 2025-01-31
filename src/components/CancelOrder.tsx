@@ -6,8 +6,8 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React from 'react';
-import {ApiUrlConstance, methods} from '../constance/constance';
+import React, { useState } from 'react';
+import {ApiUrlConstance, errorMessage, methods} from '../constance/constance';
 import {orderType} from '../types/type';
 
 interface CancelOrderProps {
@@ -27,14 +27,15 @@ const CancelOrder: React.FC<CancelOrderProps> = ({
   getOrderDetails,
   setCancelOrderModel
 }) => {
+  const [error, setError] = useState("")
   const onCancel = async () => {
     try {
       const response = await fetch(
-        `${ApiUrlConstance?.apiUrl}/${ApiUrlConstance?.order}/${orderId}/${ApiUrlConstance?.cancel}`,
+        `${ApiUrlConstance?.localhostUrl}/${ApiUrlConstance?.order}/${orderId}/${ApiUrlConstance?.cancel}`,
         {
           method: methods?.get,
           headers: {
-            Authorization: `${ApiUrlConstance?.bearer} eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7Il9pZCI6MX0sImlhdCI6MTczODMwODI1NH0.MBkDmIVd5M6fwMNF-A2ouEx9wNfJ-BRowzQjnMtat88`,
+            Authorization: `${ApiUrlConstance?.bearer} ${ApiUrlConstance?.localDatabaseToken}`,
             outlet: ApiUrlConstance?.firstOutlet,
           },
         },
@@ -46,6 +47,17 @@ const CancelOrder: React.FC<CancelOrderProps> = ({
         setOrderList(responseData);
         setCancelOrderModel(false)
         console.log(2);
+      }
+      else{
+        const responseData = await response.json();
+        switch(responseData.error){
+          case 'const_error_only_paid_checks_can_be_closed':
+            return setError(errorMessage.const_error_only_paid_checks_can_be_closed);
+          case 'const_error_no_order_found':
+            return setError(errorMessage.const_error_no_order_found);
+          default:
+            return setError(errorMessage.complete_order_default);
+        }
       }
     } catch {}
   };
@@ -73,7 +85,7 @@ const CancelOrder: React.FC<CancelOrderProps> = ({
             Are you sure you want to cancel this order?
           </Text>
 
-          <View style={styles.warningContainer}>
+          {error ?<Text>{error}</Text>:<View style={styles.warningContainer}>
             <Image
               source={require('../assets/exclamation.png')}
               style={styles.warningIcon}
@@ -81,7 +93,7 @@ const CancelOrder: React.FC<CancelOrderProps> = ({
             <Text style={styles.warningText}>
               Cancelling this order will initiate refund process!
             </Text>
-          </View>
+          </View>}
 
           <View style={styles.buttonContainer}>
             <TouchableOpacity

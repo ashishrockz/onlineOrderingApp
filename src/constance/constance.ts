@@ -240,6 +240,10 @@ export const errorMessage: { [key: string]: string } = {
   incorrect_password:"Incorrect Password",
   incorrect_mail:"Username and Password miss match",
   catch_error:'Something went wrong... Please try again',
+  const_error_only_paid_checks_can_be_closed:"Only paid checks can be marked as completed",
+  const_error_no_order_found:"Invalid order id",
+  complete_order_default:"We're having trouble completing the order, please try again after sometime..."
+
 };
 export const errorMessageConstants :{ [key: string]: string } = {
   incorrect_password:"incorrect_password",

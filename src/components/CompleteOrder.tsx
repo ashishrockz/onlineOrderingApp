@@ -6,8 +6,8 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React from 'react';
-import {ApiUrlConstance, methods} from '../constance/constance';
+import React, { useState } from 'react';
+import {ApiUrlConstance, errorMessage, methods} from '../constance/constance';
 import { orderType } from '../types/type';
 
 interface CompleteOrderProps {
@@ -27,26 +27,35 @@ const CompleteOrder: React.FC<CompleteOrderProps> = ({
   getOrderDetails,
   setCompleteModel,
 }) => {
+  const [error, setError] = useState("");
   const onComplete = async () => {
     try {
       const response = await fetch(
-        `${ApiUrlConstance?.apiUrl}/${ApiUrlConstance?.order}/${orderId}/${ApiUrlConstance?.complete}`,
+        `${ApiUrlConstance?.localhostUrl}/${ApiUrlConstance?.order}/${orderId}/${ApiUrlConstance?.complete}`,
         {
           method: methods?.get,
           headers: {
-            Authorization: `${ApiUrlConstance?.bearer} eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7Il9pZCI6MX0sImlhdCI6MTczODMwODI1NH0.MBkDmIVd5M6fwMNF-A2ouEx9wNfJ-BRowzQjnMtat88`,
+            Authorization: `${ApiUrlConstance?.bearer} ${ApiUrlConstance?.localDatabaseToken}`,
             outlet: ApiUrlConstance?.firstOutlet,
           },
         },
-      );
-      console.log(1);
-      
+      );     
       if(response?.ok){
         const responseData = await getOrderDetails()
         setOrderList(responseData)
-        setCompleteModel(false)
-        console.log(2);
-        
+        setCompleteModel(false);
+      }
+      else{
+        const responseData = await response.json();
+        console.log(responseData)
+        switch(responseData.error){
+          case 'const_error_only_paid_checks_can_be_closed':
+            return setError(errorMessage.const_error_only_paid_checks_can_be_closed);
+          case 'const_error_no_order_found':
+            return setError(errorMessage.const_error_no_order_found);
+          default:
+            return setError(errorMessage.complete_order_default);
+        }
       }
     } catch {}
   };
@@ -69,9 +78,9 @@ const CompleteOrder: React.FC<CompleteOrderProps> = ({
 
           <Text style={styles.modalTitle}>Order ID: {orderId}</Text>
 
-          <Text style={styles.modalText}>
+          {error ?<Text>{error}</Text>:<Text style={styles.modalText}>
             Are you sure you want to mark this order as complete?
-          </Text>
+          </Text>}
 
           <View style={styles.buttonContainer}>
             <TouchableOpacity
@@ -123,6 +132,12 @@ const styles = StyleSheet.create({
     fontSize: 24,
     color: '#666',
     fontWeight: '300',
+  },
+  errorMg:{
+    fontSize: 16,
+    color: '#f31260',
+    marginBottom: 20,
+    textAlign: 'center',
   },
   modalTitle: {
     fontSize: 18,
