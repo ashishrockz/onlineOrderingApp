@@ -30,15 +30,18 @@ import {
 } from '../constance/constance';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {useNavigation} from '@react-navigation/native';
-import {twelveHoursFormat, formatDate} from '../hooks/helpers';
+import {twelveHoursFormat, formatDate, formatOrderData} from '../hooks/helpers';
 import { io } from 'socket.io-client';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import PopUpFullScreen from './PopUpFullScreen';
 type RootStackParamList = {
   RecentOrdersOfUsers: {name: string};
   "View Order Details": {id: number};
 };
-
-type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'RecentOrdersOfUsers'>;
+import CompleteOrder from './CompleteOrder';
+import CancelOrder from './CancelOrder';
+ 
+export type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'RecentOrdersOfUsers'>;
 
 const Orders = () => {
   const navigation = useNavigation<NavigationProp>();
@@ -49,16 +52,23 @@ const Orders = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<string>(statusmode?.all);
+  const [showNotification, setShowNotification] = useState(false);
+  const [newOrders, setNewOrders] = useState([]);
+  const [viewOrderId, setViewOrderId] = useState("");
+  const [completeModel, setCompleteModel] = useState(false);
+  const [cancelOrderModel, setCancelOrderModel] = useState(false);
+  const [selectedOrderId, setSelectedOrderId] = useState<string>('');
 
+  console.log(showNotification)
   const getOrderDetails = async () => {
     try {
       const response = await fetch(
-        `${ApiUrlConstance?.apiUrl}/${ApiUrlConstance?.order}`,
+        `${ApiUrlConstance?.localhostUrl}/${ApiUrlConstance?.order}`,
         {
           method: methods?.get,
           headers: {
-            Authorization: `${ApiUrlConstance?.bearer} eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7Il9pZCI6MX0sImlhdCI6MTczODEzNDM2Mn0.tWolUUPvQ1gyAi9c060NqtQ9Qqjqd02xLaSYM3al-yU`,
-            outlet: "12",
+            Authorization: `${ApiUrlConstance?.bearer} ${ApiUrlConstance?.localDatabaseToken}`,
+            outlet: ApiUrlConstance.firstOutlet,
           },
         },
       );
@@ -75,12 +85,8 @@ const Orders = () => {
     }
   };
 
-  // const cancleOrder = () =>{
-     
-  // }
-
-  useEffect(()=>{
-    const socket = io("http://10.0.12.113:9001");
+useEffect(()=>{
+    const socket = io(ApiUrlConstance.localhostSocketUrl);
     socket.on('connect', () => {
       console.log('Connected to the io server');
     });
@@ -89,10 +95,26 @@ const Orders = () => {
       console.log('Reason for disconnect is :', reason);
     });
 
-    socket.on("order_details_12",(data)=>{
-      console.log(data)
+    socket.on(`${ApiUrlConstance.socketKeyWord}_${ApiUrlConstance.firstOutlet}`,async(data)=>{
+      console.log(data);
+      if(data){
+        const formattedOrders = formatOrderData(data);
+        setNewOrders((prevOrders):any => [...prevOrders, ...formattedOrders]);
+        if (formattedOrders.length === 1) {
+          setViewOrderId(formattedOrders[0].id);
+        }
+        setShowNotification((pre)=>(!pre));
+        const responseData = await getOrderDetails();
+        if (responseData) {
+          setOrderList(responseData);
+          setFilteredOrders(responseData);
+        }
+      }
     })
-  },[]);
+    return ()=>{
+      socket.disconnect();
+    }
+  },[])
 
   const onRefresh = React.useCallback(async () => {
     setIsRefreshing(true);
@@ -147,6 +169,14 @@ const Orders = () => {
             if (nativeEvent.event === 'View Order') {
               navigation.navigate("View Order Details", {id: order.id});
             } 
+            if (nativeEvent.event == 'Mark as completed') {
+              setCompleteModel(true);
+              setSelectedOrderId(order.id.toString());
+            }
+            if (nativeEvent.event == 'Cancel order') {
+              setCancelOrderModel(true);
+              setSelectedOrderId(order.id.toString());
+            }
           }}
           actions={ order.status == 2 ? moreActionsForPaid : moreActionsForOther}
           shouldOpenOnLongPress={false}>
@@ -273,6 +303,23 @@ const Orders = () => {
           )}
         </ScrollView>
       )}
+      {showNotification &&<PopUpFullScreen visible= {showNotification} orderId={viewOrderId} number={newOrders.length} setNewOrders={setNewOrders} setShowNotification={setShowNotification} />}
+      <CompleteOrder
+        visible={completeModel}
+        onClose={() => {
+          setCompleteModel(false);
+          setSelectedOrderId('');
+        }}
+        orderId={selectedOrderId}
+      />
+      <CancelOrder
+        visible={cancelOrderModel}
+        onClose={() => {
+          setCancelOrderModel(false);
+          setSelectedOrderId('');
+        }}
+        orderId={selectedOrderId}
+      />
     </SafeAreaView>
   );
 };

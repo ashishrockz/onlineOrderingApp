@@ -1,8 +1,11 @@
 import { Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import React, { useEffect } from 'react';
 import SoundPlayer from 'react-native-sound-player';
+import { useNavigation } from '@react-navigation/native';
+import { NavigationProp } from './Order';
 
-const PopUpFullScreen = ({ visible, onClose, title, message, number = "1" }: any) => {
+const PopUpFullScreen = ({ visible, onClose,orderId, setShowNotification,setNewOrders, number }: any) => {
+  const navigation = useNavigation<NavigationProp>();
   useEffect(() => {
     if (visible) {
       try {
@@ -12,6 +15,22 @@ const PopUpFullScreen = ({ visible, onClose, title, message, number = "1" }: any
       }
     }
   }, [visible]);
+
+  const viewOrderDetails = () =>{
+    if(number == 1){
+      navigation.navigate("View Order Details",{id:orderId});
+      setShowNotification((pre:boolean)=>(!pre));
+      setTimeout(()=>{
+        setNewOrders([])
+      },1000)
+    }
+    else{
+      setShowNotification((pre:boolean)=>(!pre));
+      setTimeout(()=>{
+        setNewOrders([])
+      },1000)
+    }
+  }
 
   return (
     <Modal
@@ -28,17 +47,19 @@ const PopUpFullScreen = ({ visible, onClose, title, message, number = "1" }: any
             <Text style={styles.circleNumber}>{number}</Text>
           </View>
 
-          <Text style={styles.modalTitle}>{title || "New Order Received"}</Text>
+          <Text style={styles.modalTitle}>{ number == 1? "New Order Received": "New Orders Received"}</Text>
           <Text style={styles.modalText}>
-            {message || "Click below to view details."}
+            {number == 1? "Click below to view details.": "Click below to view orders details"}
           </Text>
 
           {/* View Details Button */}
           <TouchableOpacity
             style={styles.button}
-            onPress={onClose}
+            onPress={()=>{
+              viewOrderDetails();
+            }}
           >
-            <Text style={styles.buttonText}>View Order Details</Text>
+            <Text style={styles.buttonText}>{number == 1? "View Order Details" : "View Orders details" }</Text>
             <Text style={styles.arrowText}>→</Text>
           </TouchableOpacity>
         </View>

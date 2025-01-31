@@ -4,7 +4,7 @@ export const statusOptions: StatusOption[] = [
   { label: "All", value: "all" },
   { label: "Paid", value: "2" },
   { label: "Completed", value: "3" },
-  { label: "Refund Initiated", value: "4" },
+  { label: "Refund", value: "4" },
   { label: "Cancelled", value: "5" },
   { label: "Refunded", value: "6" },
 ];
@@ -189,7 +189,7 @@ export const statusStyles: StatusStyles = {
 export const STATUS_MAP: { [key: number]: MyObjectType } = {
   2: { label: "Paid", color: "primary" },
   3: { label: "Completed", color: "success" },
-  4: { label: "Refund Initiated", color: "warning" },
+  4: { label: "Refund", color: "warning" },
   5: { label: "Cancelled", color: "danger" },
   6: { label: "Refunded", color: "warning" },
 };
@@ -206,7 +206,11 @@ export const ApiUrlConstance: { [key: string]: string } = {
   dummyDataApi:'http://10.0.2.2:8000/dummyData',
   bearer:'Bearer',
   cancel:"cancel",
-  complete:"complete"
+  complete:"complete",
+  localhostUrl:"http://10.0.2.2:3000",
+  localhostSocketUrl:"http://10.0.2.2:9001",
+  localDatabaseToken:"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7Il9pZCI6MX0sImlhdCI6MTczODI5MjUwM30.lvfInPOIb_I6GAU9E46h8uIm5eT_HVTMIXb8AIryEEo",
+  socketKeyWord:"order_details"
 };
  export const methods={
   get:"GET",

@@ -24,15 +24,15 @@ export default function OrderDetails({route}: any) {
 
   const getOrderIdDetails = async (id: number) => {
     try {
-      const url = `${ApiUrlConstance?.chefgaApiUrl}/${ApiUrlConstance?.order}/${id}`;
+      const url = `${ApiUrlConstance?.localhostUrl}/${ApiUrlConstance?.order}/${id}`;
       const response = await fetch(url, {
         method: methods?.get,
         headers: {
-          Authorization: `${ApiUrlConstance?.bearer} eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7Il9pZCI6MX0sImlhdCI6MTczODE0NDQ1OH0.x4QjysICjH7u4oMsyFfq0qGZNkcvZfwx-CRyhm2cpEQ`,
-          outlet: ApiUrlConstance?.secondOutlet,
+          Authorization: `${ApiUrlConstance?.bearer} ${ApiUrlConstance.localDatabaseToken}`,
+          outlet: ApiUrlConstance?.firstOutlet,
         },
       });
-      if (response.ok) {
+      if (response?.ok) {
         setError(null);
         const responseData = await response.json();
         setViewOrderDetails(responseData?.data);

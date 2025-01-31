@@ -44,6 +44,7 @@ const Login = () => {
       if (response.ok) {
         const responceData = await response.json();
         if (responceData?.data?.access_token) {
+          console.log(responceData?.data?.access_token)
           await AsyncStorage.setItem(
             'userToken',
             responceData.data.access_token,
